@@ -15,6 +15,7 @@ TRACKING_PARAMS: frozenset[str] = frozenset(
 SHORTENER_HOSTS: frozenset[str] = frozenset({"t.co", "bit.ly", "buff.ly", "ow.ly"})
 
 _AMP_CACHE_RE = re.compile(r"^/c/(s/)?(.+)$")
+_BLOCK_TAG_RE = re.compile(r"<\s*/?\s*(p|div|br|li|ul|ol|h[1-6]|blockquote|tr|td|th|section|article)\b[^>]*>", re.I)
 _TAG_RE = re.compile(r"<[^>]+>")
 _WS_RE = re.compile(r"\s+")
 
@@ -72,7 +73,7 @@ def item_id(canonical_url: str) -> str:
 def make_excerpt(text: str | None, limit: int = 300) -> str | None:
     if not text:
         return None
-    plain = html.unescape(_TAG_RE.sub(" ", text))
+    plain = html.unescape(_TAG_RE.sub("", _BLOCK_TAG_RE.sub(" ", text)))
     plain = _WS_RE.sub(" ", plain.replace("\xa0", " ")).strip()
     if not plain:
         return None

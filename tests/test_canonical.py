@@ -72,3 +72,11 @@ def test_ensure_utc_converts_aware():
 
 def test_ensure_utc_none_uses_fallback():
     assert ensure_utc(None, fallback=NOW) == NOW
+
+
+def test_excerpt_inline_tags_do_not_split_punctuation():
+    assert make_excerpt("<p>Launched <b>a school</b>. Next <i>para</i>.</p><p>Second.</p>") == "Launched a school. Next para. Second."
+
+
+def test_excerpt_block_tags_become_spaces():
+    assert make_excerpt("<div>One</div><div>Two</div><br>Three") == "One Two Three"

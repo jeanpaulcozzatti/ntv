@@ -5,9 +5,10 @@ from __future__ import annotations
 from ..sources import Kind
 from .base import USER_AGENT, FetchResult, Fetcher, fail_state, make_resolver, ok_state
 from .bluesky import BlueskyFetcher
+from .reddit import RedditFetcher
 from .rss import RssFetcher
 
-_REGISTRY: dict[str, Fetcher] = {"rss": RssFetcher(), "bluesky": BlueskyFetcher()}
+_REGISTRY: dict[str, Fetcher] = {"rss": RssFetcher(), "bluesky": BlueskyFetcher(), "reddit": RedditFetcher()}
 
 
 def register(kind: str, fetcher: Fetcher) -> None:
