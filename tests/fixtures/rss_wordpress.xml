@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title>Navajo Times</title>
+  <link>https://navajotimes.com</link>
+  <item>
+    <title>Council approves water settlement funding</title>
+    <link>https://navajotimes.com/reznews/council-approves-water/?utm_source=rss&amp;utm_medium=rss</link>
+    <dc:creator>Arlyssa Becenti</dc:creator>
+    <pubDate>Fri, 10 Oct 2026 12:05:00 +0000</pubDate>
+    <description><![CDATA[<p>WINDOW ROCK &mdash; The Navajo Nation Council voted <b>18-4</b> on Thursday to approve funding.</p>]]></description>
+  </item>
+  <item>
+    <title>Chapter houses prepare for winter</title>
+    <link>https://navajotimes.com/reznews/chapter-houses-winter/</link>
+    <dc:creator>Donovan Quintero</dc:creator>
+    <pubDate>Fri, 10 Oct 2026 09:00:00 -0700</pubDate>
+    <description>Chapters across the Nation are stockpiling wood and coal.</description>
+  </item>
+  <item>
+    <title>Opinion: On language and land</title>
+    <link>https://navajotimes.com/opinion/language-land/</link>
+    <pubDate>Thu, 09 Oct 2026 20:30:00 +0000</pubDate>
+    <description>An essay.</description>
+  </item>
+</channel>
+</rss>
