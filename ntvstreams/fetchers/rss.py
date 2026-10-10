@@ -29,12 +29,22 @@ def _entry_body(entry) -> str | None:
     return entry.get("summary")
 
 
+def _is_google_news(source: Source) -> bool:
+    return "news.google.com" in (source.url or "")
+
+
 def entry_to_item(entry, source: Source, now: datetime, resolve=None) -> Item | None:
     link = (entry.get("link") or "").strip()
     if not link:
         return None
     canonical = canonicalize(link, resolve=resolve)
     title = " ".join((entry.get("title") or "").split()) or f"{source.name} item"
+    gnews = _is_google_news(source)
+    if gnews:
+        # Google News appends " - Outlet Name" to every title; the <source> element carries the same name.
+        outlet = (entry.get("source") or {}).get("title") or source.name
+        if title.endswith(f" - {outlet}"):
+            title = title[: -len(outlet) - 3].rstrip()
     return Item(
         id=item_id(canonical),
         source_id=source.id,
@@ -43,7 +53,7 @@ def entry_to_item(entry, source: Source, now: datetime, resolve=None) -> Item | 
         kind="article",
         title=title,
         author=entry.get("author") or None,
-        excerpt=make_excerpt(_entry_body(entry)),
+        excerpt=None if gnews else make_excerpt(_entry_body(entry)),
         published_at=ensure_utc(_entry_datetime(entry), now),
         fetched_at=now,
         raw={k: entry.get(k) for k in ("link", "title", "author", "summary", "published") if entry.get(k)},

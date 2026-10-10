@@ -77,3 +77,12 @@ def test_rss_user_agent_sent(respx_mock, http):
     route = respx_mock.get(SRC.url).respond(200, content=(FIX / "rss_nodate.xml").read_bytes())
     run(http)
     assert route.calls[0].request.headers["User-Agent"].startswith("NTVstreams/")
+
+
+def test_rss_google_news_strips_source_suffix(respx_mock, http):
+    src = Source(id="gn-navajo", name="Navajo Times", kind="rss", tier=1,
+                 url="https://news.google.com/rss/search?q=site:navajotimes.com&hl=en-US&gl=US&ceid=US:en")
+    respx_mock.get(url__startswith="https://news.google.com/rss/search").respond(200, content=(FIX / "rss_gnews.xml").read_bytes())
+    res = run(http, src=src)
+    assert [i.title for i in res.items] == ["Council approves water settlement funding", "A title with - a dash in the middle"]
+    assert res.items[0].excerpt is None  # Google News descriptions are just the link again

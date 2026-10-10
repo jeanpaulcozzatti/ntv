@@ -13,7 +13,7 @@ from tests.conftest import NOW
 FIX = Path(__file__).parent / "fixtures"
 SEARCH = Source(id="bsky-indian-country", name="Bluesky", kind="bluesky", query='"Indian Country"', tier=4)
 AUTHOR = Source(id="bsky-nno", name="Bluesky", kind="bluesky", actor="nativenewsonline.bsky.social", tier=4)
-BASE = "https://public.api.bsky.app/xrpc/"
+BASE = "https://api.bsky.app/xrpc/"
 
 
 @pytest.fixture

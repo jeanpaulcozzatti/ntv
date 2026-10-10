@@ -12,7 +12,7 @@ from ..models import Item, SourceState
 from ..sources import Source
 from .base import FetchResult, failed, get, make_resolver, ok_state
 
-XRPC = "https://public.api.bsky.app/xrpc/"
+XRPC = "https://api.bsky.app/xrpc/"  # public.api.bsky.app returns 403 for searchPosts
 TITLE_MAX = 140
 _SOCIAL_HOSTS = {"bsky.app", "bsky.social"}
 
