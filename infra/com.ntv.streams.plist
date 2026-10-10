@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ntv.streams</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>/Users/jeanpaul/Dev/ntv/infra/run.sh</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/jeanpaul/Dev/ntv</string>
+  <key>StartInterval</key>
+  <integer>3600</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/jeanpaul/Library/Logs/ntvstreams.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jeanpaul/Library/Logs/ntvstreams.err.log</string>
+</dict>
+</plist>

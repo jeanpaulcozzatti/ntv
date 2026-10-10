@@ -48,3 +48,13 @@ def test_fetch_stage_survives_fetcher_exception(store, respx_mock, monkeypatch):
         summary = fetch_stage([GOOD], store, http, NOW)
     assert summary.items_new == 0 and "kaboom" in summary.errors[0]["message"]
     assert store.get_source_state("good").consecutive_fails == 1
+
+
+def test_fetch_stage_skips_items_older_than_retention(store, respx_mock):
+    old_feed = (FIX / "rss_wordpress.xml").read_text().replace("Fri, 10 Oct 2026 12:05:00 +0000", "Mon, 01 Sep 2026 12:05:00 +0000")
+    respx_mock.get(GOOD.url).respond(200, content=old_feed.encode())
+    with httpx.Client() as http:
+        summary = fetch_stage([GOOD], store, http, NOW)
+    assert summary.items_new == 2
+    assert len(store.get_items(["x"])) == 0
+    assert all(i.published_at > NOW - __import__("datetime").timedelta(days=7) for i in store.items_in_window(NOW, 24 * 30))

@@ -5,7 +5,9 @@
 <main class="col-main">
   <section class="desk desk--news">
     <h2 class="kicker desk-head">News</h2>
-    {% for sv in data.news %}{{ s.story(sv, top=loop.first) }}{% endfor %}
+    {% for sv in data.news %}{{ s.story(sv, top=loop.first) }}{% else %}
+    <p class="more">No stories yet. The editor has not run since the last fetch; everything collected is in the River.</p>
+    {% endfor %}
   </section>
 </main>
 <aside class="col-side">

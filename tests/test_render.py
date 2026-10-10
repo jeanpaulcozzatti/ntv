@@ -149,3 +149,12 @@ def test_golden_index(rendered):
         golden.write_text(rendered["index.html"])
     assert golden.exists(), "run with UPDATE_GOLDEN=1 to create the golden file"
     assert norm(rendered["index.html"]) == norm(golden.read_text())
+
+
+def test_empty_desks_show_placeholder(page_data, tmp_path):
+    page_data.news, page_data.culture = [], []
+    render_site(page_data, tmp_path)
+    html = (tmp_path / "index.html").read_text()
+    main = html[html.index("<main"):html.index("</main>")]
+    assert "No stories yet" in main and "River" in main
+    assert "Culture" not in html[html.index("<aside"):html.index("</aside>")]

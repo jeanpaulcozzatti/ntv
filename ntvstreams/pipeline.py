@@ -8,7 +8,7 @@ import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import httpx
@@ -20,7 +20,7 @@ from .models import Run
 from .publish import Publisher
 from .render import build_page_data, render_site
 from .sources import Source
-from .store import Store
+from .store import ITEM_DAYS, Store
 
 
 @dataclass
@@ -43,9 +43,14 @@ def fetch_stage(sources: list[Source], store: Store, http: httpx.Client, now: da
             summary.errors.append({"source_id": source.id, "message": msg})
             continue
         if result.items:
-            summary.items_new += store.upsert_items(result.items)
+            # Feeds (Google News site: queries especially) serve items years old; keep only what retention would keep.
+            cutoff = now - timedelta(days=ITEM_DAYS)
+            fresh = [it for it in result.items if it.published_at >= cutoff]
+            kept = {it.id for it in fresh}
+            summary.items_new += store.upsert_items(fresh)
             for post_id, article_id in result.links:
-                store.add_discussion_link(post_id, article_id)
+                if post_id in kept and article_id in kept:
+                    store.add_discussion_link(post_id, article_id)
         if result.state is not None:
             store.set_source_state(result.state)
         if result.error:
