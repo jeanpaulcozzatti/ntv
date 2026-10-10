@@ -31,6 +31,10 @@ class LocalPublisher:
         actions: list[str] = []
         src_files = _files(out_dir)
         dst_files = _files(self.target) if self.target.exists() else set()
+        # Mirroring deletes, so never mirror into a directory that is not ours: it must be empty, missing,
+        # or already hold a rendered site (index.html present).
+        if dst_files and Path("index.html") not in dst_files:
+            raise RuntimeError(f"refusing to mirror into {self.target}: it has files but no index.html")
         for rel in sorted(src_files):
             src, dst = out_dir / rel, self.target / rel
             if dst.exists() and filecmp.cmp(src, dst, shallow=False):

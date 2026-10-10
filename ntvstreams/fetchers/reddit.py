@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 from datetime import datetime
 from urllib.parse import urlsplit
@@ -41,7 +42,7 @@ def entry_to_items(entry, source: Source, now: datetime, resolve=None) -> tuple[
     items, links = [post], []
     content = entry.content[0].value if entry.get("content") else (entry.get("summary") or "")
     m = _LINK_RE.search(content)
-    target = m.group(1) if m else ""
+    target = html.unescape(m.group(1)) if m else ""
     host = (urlsplit(target).hostname or "").lower()
     if target and host and host not in REDDIT_HOSTS:
         a_canon = canonicalize(target, resolve=resolve)

@@ -23,6 +23,10 @@ from .sources import Source
 from .store import ITEM_DAYS, Store
 
 
+def _safe_url(url: str) -> bool:
+    return url.lower().startswith(("http://", "https://"))
+
+
 @dataclass
 class FetchSummary:
     items_new: int = 0
@@ -45,7 +49,7 @@ def fetch_stage(sources: list[Source], store: Store, http: httpx.Client, now: da
         if result.items:
             # Feeds (Google News site: queries especially) serve items years old; keep only what retention would keep.
             cutoff = now - timedelta(days=ITEM_DAYS)
-            fresh = [it for it in result.items if it.published_at >= cutoff]
+            fresh = [it for it in result.items if it.published_at >= cutoff and _safe_url(it.url) and _safe_url(it.canonical_url)]
             kept = {it.id for it in fresh}
             summary.items_new += store.upsert_items(fresh)
             for post_id, article_id in result.links:
@@ -134,6 +138,8 @@ def run_all(config: Config, sources: list[Source], store: Store, http: httpx.Cli
             run.input_tokens, run.output_tokens, run.cache_read_tokens = outcome.input_tokens, outcome.output_tokens, outcome.cache_read_tokens
             if outcome.error:
                 run.errors.append({"stage": "curate", "message": f"{outcome.reason}: {outcome.error}"})
+        # Stories age out at the end of every run, curated or not, so a stalled editor never leaves old news up.
+        store.expire_stories_older_than(now - timedelta(hours=config.window_hours), now)
 
         run.stage_reached = "render"
         data = build_page_data(store, sources, config, now)

@@ -83,16 +83,16 @@ class Store:
 
     # ── items ──────────────────────────────────────────────────────────────
     def upsert_items(self, items: list[Item]) -> int:
+        """Insert new items; refresh engagement and raw on existing ones.
+
+        A record first seen through a social link card (raw["via"]) is replaced by the
+        first-party record when the outlet's own feed later serves the same URL.
+        """
         new = 0
         with self.conn:
             for it in items:
-                exists = self.conn.execute("SELECT 1 FROM items WHERE id=?", (it.id,)).fetchone() is not None
-                if exists:
-                    self.conn.execute(
-                        "UPDATE items SET engagement=?, raw=? WHERE id=?",
-                        (it.engagement, json.dumps(it.raw, default=str), it.id),
-                    )
-                else:
+                row = self.conn.execute("SELECT raw FROM items WHERE id=?", (it.id,)).fetchone()
+                if row is None:
                     self.conn.execute(
                         """INSERT INTO items (id, source_id, url, canonical_url, kind, title, author, excerpt,
                            published_at, fetched_at, engagement, raw) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
@@ -100,6 +100,22 @@ class Store:
                          _ts(it.published_at), _ts(it.fetched_at), it.engagement, json.dumps(it.raw, default=str)),
                     )
                     new += 1
+                    continue
+                existing_raw = json.loads(row["raw"]) if row["raw"] else {}
+                if "via" in existing_raw and "via" not in it.raw:
+                    self.conn.execute(
+                        """UPDATE items SET source_id=?, url=?, kind=?, title=?, author=?, excerpt=?, published_at=?,
+                           engagement=?, raw=? WHERE id=?""",
+                        (it.source_id, it.url, it.kind, it.title, it.author, it.excerpt, _ts(it.published_at),
+                         it.engagement, json.dumps(it.raw, default=str), it.id),
+                    )
+                elif "via" in it.raw and "via" not in existing_raw:
+                    self.conn.execute("UPDATE items SET engagement=MAX(engagement, ?) WHERE id=?", (it.engagement, it.id))
+                else:
+                    self.conn.execute(
+                        "UPDATE items SET engagement=?, raw=? WHERE id=?",
+                        (it.engagement, json.dumps(it.raw, default=str), it.id),
+                    )
         return new
 
     def add_discussion_link(self, post_item_id: str, article_item_id: str) -> None:

@@ -58,3 +58,13 @@ def test_fetch_stage_skips_items_older_than_retention(store, respx_mock):
     assert summary.items_new == 2
     assert len(store.get_items(["x"])) == 0
     assert all(i.published_at > NOW - __import__("datetime").timedelta(days=7) for i in store.items_in_window(NOW, 24 * 30))
+
+
+def test_fetch_stage_drops_items_with_unsafe_url_scheme(store, respx_mock):
+    feed = (FIX / "rss_wordpress.xml").read_text().replace("https://navajotimes.com/opinion/language-land/", "javascript:alert(1)")
+    respx_mock.get(GOOD.url).respond(200, content=feed.encode())
+    with httpx.Client() as http:
+        summary = fetch_stage([GOOD], store, http, NOW)
+    items = store.items_in_window(NOW, 48)
+    assert summary.items_new == 2 and len(items) == 2
+    assert all(i.url.startswith("https://") for i in items)

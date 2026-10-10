@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import timedelta
 
 from ntvstreams.models import SourceState, StoryMember
@@ -117,3 +118,17 @@ def test_runs_last_curation_and_month_tokens(store):
     assert store.last_run().errors[0]["source_id"] == "x"
     assert store.last_curation_at() == hours_ago(24 * 20)
     assert store.month_input_tokens(NOW) == 50
+
+
+def test_first_party_record_replaces_link_card_record(store):
+    via = make_item("a" * 16, source_id="bsky", title="Card title", published_at=hours_ago(2), raw={"via": "at://post"})
+    store.upsert_items([via])
+    first_party = make_item("a" * 16, source_id="ict", title="Real headline", author="A. Reporter", excerpt="Real excerpt",
+                            published_at=hours_ago(3), fetched_at=NOW, raw={"link": "x"})
+    assert store.upsert_items([first_party]) == 0
+    got = store.get_items(["a" * 16])["a" * 16]
+    assert got.source_id == "ict" and got.title == "Real headline" and got.author == "A. Reporter"
+    assert got.published_at == hours_ago(3) and got.fetched_at == hours_ago(2)  # fetched_at kept
+    # and a later link-card sighting does not take it back
+    store.upsert_items([replace(via, engagement=5)])
+    assert store.get_items(["a" * 16])["a" * 16].source_id == "ict"

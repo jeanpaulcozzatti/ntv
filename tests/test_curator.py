@@ -226,3 +226,30 @@ def test_anthropic_curator_wraps_any_sdk_exception():
     with pytest.raises(CuratorError) as exc:
         cur.complete("sys", "user")
     assert "authentication" in str(exc.value)
+
+
+def test_unplaced_articles_are_reoffered_next_run(seeded):
+    """An article left unplaced in run N is offered again in run N+1 alongside the fresh items."""
+    t0 = NOW - timedelta(hours=2)
+    first = FakeCurator([PAGE_OK])
+    curate_stage(seeded, first, CFG, SOURCES, "R1", t0)
+    seeded.upsert_items([replace(load_items()[0], id="item000000000099", url="https://example.org/99", canonical_url="https://example.org/99", fetched_at=NOW)])
+    second = FakeCurator([json.dumps({"stories": [], "unplaced_item_ids": []})])
+    curate_stage(seeded, second, CFG, SOURCES, "R2", NOW)
+    user = second.calls[0][1]
+    assert "item000000000099" in user
+    assert "item000000000009" in user and "item000000000016" in user  # unplaced in run 1
+    assert "item000000000001" not in user.split("NEW ITEMS")[1]  # placed items are not re-offered
+
+
+def test_discussion_posts_follow_their_article(seeded):
+    """A post that links to an article lands in that article's story as discussion without the model naming it."""
+    seeded.add_discussion_link("item000000000030", "item000000000009")  # post 30 links to Osage article 9
+    page = json.loads(PAGE_OK)
+    page["stories"].append({"id": None, "desk": "news", "headline": "Osage Nation Congress passes its budget", "lead_item_id": "item000000000009",
+                            "coverage_item_ids": [], "discussion_item_ids": [], "rank": 4, "rationale": "r"})
+    page["unplaced_item_ids"] = ["item000000000010", "item000000000011", "item000000000016"]
+    out = curate_stage(seeded, FakeCurator([json.dumps(page)]), CFG, SOURCES, "R1", NOW)
+    assert out.curated
+    osage = next(s for s in seeded.active_stories() if s.lead_item_id == "item000000000009")
+    assert ("item000000000030", "discussion") in {(m.item_id, m.role) for m in seeded.story_members(osage.id)}

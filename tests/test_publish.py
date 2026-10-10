@@ -16,6 +16,7 @@ def test_local_mirror_copies_and_deletes(tmp_path):
     out = _site(tmp_path)
     target = tmp_path / "site"
     target.mkdir()
+    (target / "index.html").write_text("<p>v0</p>")
     (target / "stale.html").write_text("old")
     actions = LocalPublisher(target).publish(out)
     assert (target / "index.html").read_text() == "<p>v1</p>"
@@ -70,3 +71,17 @@ def test_get_publisher_by_backend(tmp_path):
     assert isinstance(local, LocalPublisher) and local.target == tmp_path / "x"
     s3 = get_publisher(Config(publish=PublishConfig(backend="s3", bucket="b", prefix="p")))
     assert isinstance(s3, S3Publisher) and s3.bucket == "b"
+
+
+def test_local_refuses_to_mirror_into_a_foreign_directory(tmp_path):
+    import pytest
+    out = _site(tmp_path)
+    foreign = tmp_path / "home"
+    foreign.mkdir()
+    (foreign / "thesis.docx").write_text("precious")
+    with pytest.raises(RuntimeError):
+        LocalPublisher(foreign).publish(out)
+    assert (foreign / "thesis.docx").exists()
+    # an empty or missing target, or one that already holds a site, is fine
+    LocalPublisher(tmp_path / "fresh").publish(out)
+    LocalPublisher(tmp_path / "fresh").publish(out)

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Literal, Protocol
 
 import anthropic
@@ -229,9 +229,12 @@ class CurateOutcome:
     error: str | None = None
 
 
-def _apply(page: PageOut, store: Store, existing: dict[str, Story], run_id: str, now: datetime) -> None:
+def _apply(page: PageOut, store: Store, existing: dict[str, Story], run_id: str, now: datetime,
+           discussion_of: dict[str, str] | None = None) -> None:
     stories: list[Story] = []
     members: list[StoryMember] = []
+    discussion_of = discussion_of or {}
+    named = {i for s in page.stories for i in [s.lead_item_id, *s.coverage_item_ids, *s.discussion_item_ids]}
     for s in page.stories:
         if s.id and s.id in existing:
             sid, created = s.id, existing[s.id].created_at
@@ -242,13 +245,20 @@ def _apply(page: PageOut, store: Store, existing: dict[str, Story], run_id: str,
         members.append(StoryMember(sid, s.lead_item_id, "lead"))
         members.extend(StoryMember(sid, i, "coverage") for i in s.coverage_item_ids)
         members.extend(StoryMember(sid, i, "discussion") for i in s.discussion_item_ids)
+        # posts that link to any article in this story follow it as discussion
+        article_ids = {s.lead_item_id, *s.coverage_item_ids}
+        for post_id, article_id in discussion_of.items():
+            if article_id in article_ids and post_id not in named:
+                members.append(StoryMember(sid, post_id, "discussion"))
+                named.add(post_id)
     store.replace_page(stories, members, run_id, now)
 
 
 def curate_stage(store: Store, client: CuratorClient, config: Config, sources_by_id: dict[str, Source],
                  run_id: str, now: datetime) -> CurateOutcome:
-    new_items = store.items_fetched_after(store.last_curation_at(), now, config.window_hours)
-    if not new_items:
+    last = store.last_curation_at()
+    fresh = store.items_fetched_after(last, now, config.window_hours)
+    if not fresh:
         return CurateOutcome(False, "no_new_items")
     if store.month_input_tokens(now) >= config.monthly_input_token_ceiling:
         return CurateOutcome(False, "token_ceiling")
@@ -256,6 +266,7 @@ def curate_stage(store: Store, client: CuratorClient, config: Config, sources_by
     current = store.active_stories()
     existing = {s.id: s for s in current}
     members = {s.id: store.story_members(s.id) for s in current}
+    placed = {m.item_id for ms in members.values() for m in ms}
     window_items = store.items_in_window(now, config.window_hours)
     items = {i.id: i for i in window_items}
     for s in current:
@@ -267,6 +278,10 @@ def curate_stage(store: Store, client: CuratorClient, config: Config, sources_by
         if it.kind == "article":
             for post in store.discussion_for(it.id):
                 discussion_of[post.id] = it.id
+    # Offer every window item that is in no story. Articles and videos stay in play until they expire;
+    # standalone posts are offered once (posts that link to an article follow it automatically in _apply).
+    fresh_ids = {i.id for i in fresh}
+    new_items = [i for i in window_items if i.id not in placed and (i.kind != "post" or i.id in fresh_ids or i.id in discussion_of)]
     known = set(items) | {i.id for i in new_items}
 
     user = build_user_message(current, members, items, new_items, sources_by_id, discussion_of)
@@ -288,7 +303,6 @@ def curate_stage(store: Store, client: CuratorClient, config: Config, sources_by
             continue
         errors = validate_page(page, known, set(existing))
         if not errors:
-            _apply(page, store, existing, run_id, now)
-            store.expire_stories_older_than(now - timedelta(hours=config.window_hours), now)
+            _apply(page, store, existing, run_id, now, discussion_of)
             return CurateOutcome(True, "ok", *totals)
     return CurateOutcome(False, "invalid_response", *totals, error="; ".join(errors))

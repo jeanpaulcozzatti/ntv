@@ -157,3 +157,18 @@ def test_unexpected_curator_exception_still_publishes(tmp_path, cfg, store, resp
     assert run.stage_reached == "done" and run.curated is False
     assert (site / "index.html").exists()
     assert any(e.get("stage") == "curate" and "sdk blew up" in e["message"] for e in run.errors)
+
+
+def test_stale_stories_expire_even_when_curator_fails(tmp_path, cfg, store, respx_mock):
+    from ntvstreams.models import StoryMember
+    from tests.conftest import make_item, make_story
+
+    _mock_feeds(respx_mock)
+    old = make_item("o" * 16, source_id="ict", published_at=NOW - timedelta(hours=60))
+    store.upsert_items([old])
+    store.replace_page([make_story("OLD", lead_item_id=old.id)], [StoryMember("OLD", old.id, "lead")], "R0", NOW - timedelta(hours=60))
+    assert len(store.active_stories()) == 1
+    with httpx.Client() as http:
+        run_all(cfg, [GOOD], store, http, FakeCurator(error=CuratorError("no key")), LocalPublisher(tmp_path / "site"), NOW)
+    assert store.active_stories() == []
+    assert "No stories yet" in (tmp_path / "site" / "index.html").read_text()

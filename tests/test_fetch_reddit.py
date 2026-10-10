@@ -65,3 +65,13 @@ def test_reddit_subreddit_comes_from_entry_category(respx_mock, http):
     assert route.call_count == 1
     posts = [i for i in res.items if i.kind == "post"]
     assert all(p.raw["subreddit"] == "IndianCountry" for p in posts)
+
+
+def test_reddit_link_href_is_html_unescaped(respx_mock, http):
+    atom = (FIX / "reddit_new.xml").read_text().replace(
+        "https://www.propublica.org/article/tohono-oodham-nation-arizona-border-wall",
+        "https://www.propublica.org/article/tohono?id=1&amp;amp;utm_source=reddit")
+    respx_mock.get(url__startswith=URL).respond(200, content=atom.encode())
+    res = run(http)
+    articles = [i for i in res.items if i.kind == "article"]
+    assert articles[0].canonical_url == "https://propublica.org/article/tohono?id=1"
