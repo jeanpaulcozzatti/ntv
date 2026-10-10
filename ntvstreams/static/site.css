@@ -1,0 +1,67 @@
+/* NTVstreams layout. Tokens come from colors_and_type.css (PHYLO editorial). */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 14px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: var(--lh-body); }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; }
+
+.page { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* Masthead: 2px ink above, 1px below, serif lockup, mono kicker, sans nav */
+.masthead { border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 18px 0 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s-5); flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: var(--s-3); }
+.brand img { width: 28px; height: 28px; display: block; }
+.brand-name { font-family: var(--serif); font-weight: 500; font-size: 22px; letter-spacing: -.014em; color: var(--ink); line-height: 1; font-optical-sizing: auto; }
+.mast-right { display: flex; align-items: center; gap: var(--s-6); flex-wrap: wrap; }
+.kicker { font-family: var(--mono); font-size: var(--t-mono); letter-spacing: var(--ls-mono); text-transform: uppercase; color: var(--muted); }
+.nav { display: flex; gap: 28px; font-size: 13.5px; font-weight: 500; }
+.nav a { color: var(--ink-soft); border-bottom: 1px solid transparent; padding-bottom: 2px; }
+.nav a.current { color: var(--brand); border-bottom-color: var(--brand); }
+
+/* Two columns, 62 / 38 */
+.grid { display: grid; grid-template-columns: 62fr 38fr; gap: var(--s-7); padding-top: var(--s-6); }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; gap: var(--s-6); } }
+
+.desk-head { border-top: 2px solid var(--ink); padding: var(--s-2) 0 var(--s-4); margin: 0; }
+
+/* Story block */
+.story { padding: 0 0 var(--s-5); margin-bottom: var(--s-5); border-bottom: 1px solid var(--rule-soft); }
+.story:last-child { border-bottom: 0; }
+.story .kicker { display: block; margin-bottom: var(--s-2); }
+.story .kicker .source { color: var(--brand); }
+.story h2, .story h3 { font-family: var(--serif); font-weight: 400; margin: 0 0 var(--s-3); color: var(--ink); letter-spacing: var(--ls-h2); }
+.story h2 { font-size: 24px; line-height: 1.1; }
+.story--top h2 { font-size: 32px; line-height: 1.05; letter-spacing: var(--ls-display); }
+.story--compact { padding-bottom: var(--s-4); margin-bottom: var(--s-4); }
+.story--compact h3 { font-size: 19px; line-height: 1.15; }
+.story h2 a:hover, .story h3 a:hover { color: var(--brand); }
+.more { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 var(--s-1); }
+.more .label { color: var(--muted); }
+.more a { color: var(--ink-soft); }
+
+/* River */
+.river { margin-top: var(--s-6); }
+.river .hour { display: block; margin: var(--s-4) 0 var(--s-2); }
+.river-item { font-size: 14.5px; margin: 0 0 var(--s-2); line-height: 1.4; }
+.river-item .kicker { margin-right: var(--s-2); }
+.river-item a { color: var(--ink-soft); }
+
+/* Sources table */
+.sources { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: var(--s-5); }
+.sources th { text-align: left; font-family: var(--mono); font-size: var(--t-mono); letter-spacing: var(--ls-mono); text-transform: uppercase; color: var(--muted); font-weight: 400; border-bottom: 1px solid var(--ink); padding: var(--s-2) var(--s-3) var(--s-2) 0; }
+.sources td { padding: var(--s-2) var(--s-3) var(--s-2) 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; }
+.sources .stale { color: var(--sockeye); }
+
+/* Prose pages */
+.prose { max-width: var(--container-narrow); padding-top: var(--s-6); }
+.prose h1 { font-family: var(--serif); font-weight: 400; font-size: var(--t-h2); letter-spacing: var(--ls-h2); line-height: var(--lh-snug); margin: 0 0 var(--s-5); }
+.prose p { font-size: var(--t-body); margin: 0 0 var(--s-4); color: var(--ink-soft); }
+.prose a { color: var(--brand); }
+
+/* Footer */
+.footer { border-top: 1px solid var(--ink); margin-top: var(--s-9); padding: var(--s-5) 0 var(--s-8); color: var(--muted); font-size: var(--t-body-sm); }
+.footer .kicker { display: block; margin-bottom: var(--s-2); }
+.footer p { margin: 0 0 var(--s-3); max-width: var(--container-narrow); }
+.footer nav { display: flex; gap: var(--s-5); }

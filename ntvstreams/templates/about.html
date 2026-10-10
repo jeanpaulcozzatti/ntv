@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}About · NTVstreams{% endblock %}
+{% block body %}
+<div class="prose">
+<h1>What this is</h1>
+<p>NTVstreams is a front page for Native American news and social media, in the manner of Techmeme. Every hour it reads the sources on the <a href="sources.html">Sources page</a>, groups the items that cover the same event, picks a lead, and writes a plain headline. The lead link goes to the outlet that reported it. The More line lists every other outlet covering it, and the Discussion line lists the social threads.</p>
+<p>The grouping, ranking, and headlines are the work of an automated editor built on Claude. Nothing here is written by a person, and nothing here is the outlet's own headline unless it says so. Attribution stays on the source line. The River, at the right, is everything fetched in the last two days, newest first, so nothing is hidden by the editor's choices.</p>
+<p>News and Culture are separate desks. Sovereignty, land, water, policy, courts, health, and language run on the News desk. Film, music, sports, fashion, awards, and the people who make them run on the Culture desk, which keeps its own ranking.</p>
+{% if data.contact_email %}<p>To suggest a source, write to <a href="mailto:{{ data.contact_email }}">{{ data.contact_email }}</a>.</p>{% endif %}
+<p>Subscribe to the front page as <a href="feed.xml">RSS</a>.</p>
+</div>
+{% endblock %}

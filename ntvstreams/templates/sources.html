@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sources · NTVstreams{% endblock %}
+{% block body %}
+<div class="prose"><h1>Sources</h1><p>Every feed, account, and search the page reads. A source is marked stale after {{ stale_after }} consecutive failed fetches; it keeps being tried.</p></div>
+<table class="sources">
+<thead><tr><th>Source</th><th>Kind</th><th>Tier</th><th>Desk</th><th>Last success</th><th>Status</th></tr></thead>
+<tbody>
+{% for sid, src in data.sources_by_id.items() %}
+{% set st = data.states.get(sid) %}
+<tr>
+  <td>{{ src.name }}{% if src.kind == 'bluesky' and src.query %} · {{ src.query }}{% elif src.kind == 'reddit' %} · r/{{ src.subreddit }}{% endif %}{% if not src.active %} (inactive){% endif %}</td>
+  <td>{{ src.kind }}</td>
+  <td>{{ src.tier }}</td>
+  <td>{{ src.desk_hint }}</td>
+  <td>{% if st and st.last_success_at %}{{ st.last_success_at | age }} ago{% else %}never{% endif %}</td>
+  <td>{% if st and st.consecutive_fails >= stale_after %}<span class="stale">stale</span>{% elif st and st.last_error %}error: {{ st.last_error }}{% else %}ok{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

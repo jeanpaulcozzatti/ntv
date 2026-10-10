@@ -1,0 +1,257 @@
+/* Copied verbatim from the BII / PHYLO design system (colors_and_type.css), editorial subsystem.
+   Source: ~/Dev/cozzatticom-handoff-ref/bii-phylo-design-system/project/colors_and_type.css
+   Do not edit here; NTVstreams layout lives in site.css. */
+/* ──────────────────────────────────────────────────────────────────────────
+   BII / PHYLO — Colors & Type
+   Editorial system. Used on bainbridge-industries.com (home, about, contact,
+   /phylo, /edna/studies). The "Report" report-system on /edna/{locks,streams,
+   timeseries} uses the same palette but with a single sans (Hanken Grotesk).
+   ────────────────────────────────────────────────────────────────────────── */
+
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400;1,6..72,500&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap");
+
+:root {
+  /* ── Color: surfaces ─────────────────────────────────────────────────── */
+  --paper:        #ffffff;   /* primary surface */
+  --paper-2:      #f4f4f4;   /* secondary surface, panels */
+  --paper-3:      #f0f5fa;   /* report background (light blue paper) */
+  --paper-4:      #F4F6F9;   /* "Light" per brand guide */
+
+  /* ── Color: ink (text) ──────────────────────────────────────────────── */
+  --ink:          #0a1a2e;   /* primary text — editorial deep navy */
+  --ink-soft:     #14253c;   /* secondary text, body lede */
+  --ink-quiet:    #1A1A1A;   /* "Ink" per brand guide */
+  --muted:        #6a7180;   /* tertiary text, captions, mono labels */
+  --muted-2:      #5a6478;   /* report variant of muted */
+  --grey:         #666666;   /* "Grey" per brand guide */
+
+  /* ── Color: brand ───────────────────────────────────────────────────── */
+  --brand:        #043bd4;   /* PRIMARY brand — editorial electric blue */
+  --brand-deep:   #003478;   /* "BII Deep" — for collateral / dark headers */
+  --brand-spec:   #004AAD;   /* spec brand from BII_Brand_Guide.pdf — used in report system */
+  --brand-light:  #2563eb;   /* hover / lighter accent */
+  --brand-line:   rgba(4, 59, 212, 0.35);
+  --brand-tint:   rgba(4, 59, 212, 0.06);
+
+  /* ── Color: support / accent ────────────────────────────────────────── */
+  --cyan:         #00a3c4;   /* accent (sparingly — water / live signal) */
+  --chinook:      #e8501a;   /* species: Chinook salmon (orange) */
+  --coho:         #2563eb;   /* species: Coho (blue) */
+  --sockeye:      #dc2626;   /* species: Sockeye (red) */
+  --count-green:  #059669;   /* validated counts / agreement */
+
+  /* ── Borders & rules ────────────────────────────────────────────────── */
+  --rule-strong:    var(--ink);                        /* 2px masthead rules */
+  --rule:           rgba(10, 26, 46, 0.55);            /* 1px under-mast rule */
+  --rule-soft:      rgba(10, 26, 46, 0.12);            /* hairlines, dividers */
+  --rule-card:      #e0e3e8;                           /* report card borders */
+  --rule-dotted:    rgba(10, 26, 46, 0.25);            /* CV-style dotted */
+
+  /* ── Type families ──────────────────────────────────────────────────── */
+  --serif:  "Newsreader", "Times New Roman", Georgia, serif;
+  --sans:   "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sans-2: "Hanken Grotesk", system-ui, -apple-system, sans-serif;  /* report-system */
+  --mono:   "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ── Type scale (px) ────────────────────────────────────────────────── */
+  --t-display-xl:   84px;  /* about-page page-head h1 (was 108) */
+  --t-display:      64px;  /* home hero h1 (was 76) */
+  --t-h1:           48px;
+  --t-h2:           38px;  /* section-head h2 */
+  --t-h3:           24px;
+  --t-h4:           19px;  /* lede serif */
+  --t-body-lg:      18px;
+  --t-body:         16px;
+  --t-body-sm:      14.5px;
+  --t-caption:      12px;
+  --t-mono:         10.5px; /* uppercase mono labels */
+  --t-mono-sm:      9.5px;
+
+  /* ── Letter-spacing ─────────────────────────────────────────────────── */
+  --ls-tight:    -0.028em; /* big serif display */
+  --ls-display:  -0.024em;
+  --ls-h2:       -0.018em;
+  --ls-name:     -0.012em;
+  --ls-mono:      0.14em;  /* mono caps */
+  --ls-mono-loose: 0.22em; /* breadcrumb, kicker */
+
+  /* ── Line-height ────────────────────────────────────────────────────── */
+  --lh-display: 0.92;
+  --lh-tight:   0.98;
+  --lh-snug:    1.05;
+  --lh-body:    1.55;
+  --lh-loose:   1.7;
+
+  /* ── Spacing scale (4px base) ───────────────────────────────────────── */
+  --s-1:   4px;
+  --s-2:   8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  80px;
+  --s-10: 96px;
+
+  /* ── Container & rhythm ────────────────────────────────────────────── */
+  --container:        1200px;
+  --container-report: 1400px;
+  --container-narrow:  720px;
+  --gutter:    24px;
+  --gutter-lg: 56px;
+
+  /* ── Radii ──────────────────────────────────────────────────────────── */
+  --r-0:    0;       /* editorial — almost everything is square */
+  --r-sm:   6px;
+  --r-md:   8px;
+  --r-lg:  12px;     /* report cards */
+  --r-pill: 999px;
+
+  /* ── Shadows ────────────────────────────────────────────────────────── */
+  --sh-soft: 0 1px 3px rgba(4, 59, 212, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sh-lg:   0 10px 15px -3px rgba(4, 59, 212, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --sh-tab:  0 2px 8px rgba(12, 74, 110, 0.30);
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:    .15s;
+  --dur:         .2s;
+  --dur-slow:    .25s;
+  --dur-reveal:    1s;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Semantic element styles. Keep selectors lightweight; pages can override.
+   ────────────────────────────────────────────────────────────────────────── */
+
+html { font-size: 14px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display (newspaper-page-head h1) */
+.t-display, .ds-h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(56px, 7.4vw, var(--t-display-xl));
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-tight);
+  color: var(--ink);
+}
+.t-display em, .ds-h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--brand);
+}
+
+/* Hero (home) */
+.t-hero {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(42px, 5.4vw, var(--t-display));
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  color: var(--ink);
+}
+.t-hero em { font-style: italic; font-weight: 300; color: var(--brand); }
+
+/* Section head */
+h2, .ds-h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: var(--t-h2);
+  line-height: 1;
+  letter-spacing: var(--ls-h2);
+  color: var(--ink);
+}
+.ds-h2 em { font-style: italic; font-weight: 300; color: var(--brand); }
+
+h3, .ds-h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: var(--t-h3);
+  line-height: 1.15;
+  letter-spacing: var(--ls-name);
+  color: var(--ink);
+}
+
+/* Lede / serif body */
+.t-lede, .ds-lede {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 19px;
+  line-height: var(--lh-body);
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+.t-lede .dropcap,
+.t-lede::first-letter,
+.ds-lede::first-letter {
+  font-weight: 600;
+  font-size: 1.15em;
+  color: var(--ink);
+}
+
+/* Prose / body serif */
+.t-prose p {
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: var(--lh-body);
+  color: var(--ink-soft);
+  margin-bottom: 18px;
+  max-width: 64ch;
+}
+.t-prose p strong { color: var(--ink); font-weight: 600; }
+.t-prose p em { font-style: italic; color: var(--brand); }
+.t-prose p:first-of-type::first-letter {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.15em;
+  color: var(--ink);
+}
+
+/* Body sans */
+p, .ds-p {
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-soft);
+}
+
+/* Mono labels / kickers / nav */
+.t-mono, .ds-mono {
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  letter-spacing: var(--ls-mono);
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.t-kicker {
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  letter-spacing: var(--ls-mono-loose);
+  text-transform: uppercase;
+  color: var(--brand);
+}
+
+code, .ds-code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--paper-2);
+  padding: 2px 6px;
+  border: 1px solid var(--rule-soft);
+}
+
+/* Italic-as-emphasis is a brand rule */
+em { font-style: italic; color: var(--brand); }
+
+/* Editorial link rule */
+a { color: var(--brand); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color var(--dur) var(--ease); }
+a:hover { border-bottom-color: var(--brand); }

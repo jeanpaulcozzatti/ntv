@@ -1,0 +1,41 @@
+{% macro kicker(sv) %}
+<span class="kicker"><span class="source">{{ sv.lead_source.name }}</span>{% if sv.lead.author %} · {{ sv.lead.author }}{% endif %} · {{ sv.lead.published_at | age }}</span>
+{% endmacro %}
+{% macro coverage_line(sv, label) %}
+{% if sv.coverage %}
+<p class="more"><span class="label">{{ label }}</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ src.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{% endif %}
+{% endmacro %}
+{% macro discussion_line(sv, label) %}
+{% if sv.discussion %}
+<p class="more"><span class="label">{{ label }}</span> {% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{% endif %}
+{% endmacro %}
+{% macro story(sv, top=false) %}
+<article class="story{% if top %} story--top{% endif %}">
+  {{ kicker(sv) }}
+  <h2><a href="{{ sv.lead.url }}">{{ sv.story.headline }}</a></h2>
+  {{ coverage_line(sv, "More:") }}
+  {{ discussion_line(sv, "Discussion:") }}
+</article>
+{% endmacro %}
+{% macro compact(sv) %}
+<article class="story story--compact">
+  {{ kicker(sv) }}
+  <h3><a href="{{ sv.lead.url }}">{{ sv.story.headline }}</a></h3>
+  {% if sv.coverage or sv.discussion %}
+  <p class="more"><span class="label">More:</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ src.name }}</a>{% if not loop.last or sv.discussion %}, {% endif %}{% endfor %}{% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+  {% endif %}
+</article>
+{% endmacro %}
+{% macro river(items) %}
+<section class="river">
+  <h2 class="kicker desk-head">River</h2>
+  {% for label, group in group_river(items) %}
+  <span class="kicker hour">{{ label }}</span>
+  {% for item in group %}
+  <p class="river-item"><span class="kicker">{{ data.sources_by_id[item.source_id].name if item.source_id in data.sources_by_id else item.source_id }}</span><a href="{{ item.url }}">{{ item.title }}</a></p>
+  {% endfor %}
+  {% endfor %}
+</section>
+{% endmacro %}

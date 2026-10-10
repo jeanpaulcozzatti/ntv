@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% import "_story.html" as s with context %}
+{% block title %}River · NTVstreams{% endblock %}
+{% block body %}
+<div class="prose"><h1>The river</h1><p>Everything fetched in the last two days, newest first.</p></div>
+{{ s.river(river) }}
+{% endblock %}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>NTVstreams</title>
+<link>{{ data.site_url or 'index.html' }}</link>
+<description>Native American news and social media, grouped and ranked hourly.</description>
+<lastBuildDate>{{ data.updated_at | rfc822 }}</lastBuildDate>
+{% for sv in data.news + data.culture %}
+<item>
+<title>{{ sv.story.headline }}</title>
+<link>{{ sv.lead.url }}</link>
+<guid isPermaLink="false">{{ sv.story.id }}</guid>
+<pubDate>{{ sv.story.updated_at | rfc822 }}</pubDate>
+<category>{{ sv.story.desk }}</category>
+<description>{{ sv.lead_source.name }}{% if sv.lead.author %} · {{ sv.lead.author }}{% endif %}.{% if sv.coverage %} More: {% for item, src in sv.coverage %}{{ src.name }}{% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}{% if sv.discussion %} Discussion: {% for pair in sv.discussion %}{{ pair | social_label }}{% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}</description>
+</item>
+{% endfor %}
+</channel>
+</rss>
