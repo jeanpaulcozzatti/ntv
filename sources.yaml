@@ -1,0 +1,60 @@
+# NTVstreams sources. Adding a source is an edit here, no deploy.
+# tier: 1 Native-run press, 2 institutional, 3 wide net, 4 social
+# desk_hint: news | culture | any  (a hint to the curator, not a rule)
+# Feed URLs verified with `ntv check-sources`; see git history for changes.
+sources:
+  # ── Tier 1: Native-run press ────────────────────────────────────────────
+  - {id: ict,                 name: ICT,                          kind: rss, tier: 1, desk_hint: news,    url: https://ictnews.org/feed}
+  - {id: ict-culture,         name: ICT Culture,                  kind: rss, tier: 1, desk_hint: culture, url: https://ictnews.org/culture/feed}
+  - {id: native-news-online,  name: Native News Online,           kind: rss, tier: 1, desk_hint: news,    url: https://nativenewsonline.net/rss}
+  - {id: nno-arts,            name: Native News Online Arts,      kind: rss, tier: 1, desk_hint: culture, url: https://nativenewsonline.net/arts-entertainment/rss}
+  - {id: indianz,             name: Indianz.com,                  kind: rss, tier: 1, desk_hint: news,    url: https://www.indianz.com/rss/news.xml}
+  - {id: tribal-business-news, name: Tribal Business News,        kind: rss, tier: 1, desk_hint: news,    url: https://tribalbusinessnews.com/rss}
+  - {id: navajo-times,        name: Navajo Times,                 kind: rss, tier: 1, desk_hint: news,    url: https://navajotimes.com/feed/}
+  - {id: cherokee-phoenix,    name: Cherokee Phoenix,             kind: rss, tier: 1, desk_hint: news,    url: 'https://www.cherokeephoenix.org/search/?f=rss&t=article&l=50&s=start_time&sd=desc'}
+  - {id: osage-news,          name: Osage News,                   kind: rss, tier: 1, desk_hint: news,    url: https://osagenews.org/feed/}
+  - {id: biskinik,            name: Biskinik,                     kind: rss, tier: 1, desk_hint: news,    url: https://www.choctawnation.com/biskinik/feed/}
+  - {id: mvskoke-media,       name: Mvskoke Media,                kind: rss, tier: 1, desk_hint: news,    url: https://www.mvskokemedia.com/feed/}
+  - {id: tulalip-news,        name: Tulalip News,                 kind: rss, tier: 1, desk_hint: news,    url: https://www.tulalipnews.com/wp/feed/}
+  - {id: lakota-times,        name: Lakota Times,                 kind: rss, tier: 1, desk_hint: news,    url: https://www.lakotatimes.com/feed/}
+  - {id: alaska-native-news,  name: Alaska Native News,           kind: rss, tier: 1, desk_hint: news,    url: https://alaska-native-news.com/feed/}
+  - {id: underscore-news,     name: Underscore News,              kind: rss, tier: 1, desk_hint: news,    url: https://www.underscore.news/feed}
+  - {id: buffalos-fire,       name: Buffalo's Fire,               kind: rss, tier: 1, desk_hint: news,    url: https://www.buffalosfire.com/feed/}
+  - {id: native-america-calling, name: Native America Calling,    kind: rss, tier: 1, desk_hint: any,     url: https://nativeamericacalling.com/feed/}
+  - {id: hcn-indigenous,      name: High Country News,            kind: rss, tier: 1, desk_hint: news,    url: https://www.hcn.org/topics/indigenous-affairs/feed/}
+  - {id: grist-indigenous,    name: Grist,                        kind: rss, tier: 1, desk_hint: news,    url: https://grist.org/indigenous/feed/}
+  # ── Tier 2: institutional ───────────────────────────────────────────────
+  - {id: ncai,                name: NCAI,                         kind: rss, tier: 2, desk_hint: news,    url: https://www.ncai.org/news/feed}
+  - {id: narf,                name: Native American Rights Fund,  kind: rss, tier: 2, desk_hint: news,    url: https://narf.org/feed/}
+  - {id: ndn-collective,      name: NDN Collective,               kind: rss, tier: 2, desk_hint: news,    url: https://ndncollective.org/feed/}
+  - {id: indian-gaming,       name: Indian Gaming Association,    kind: rss, tier: 2, desk_hint: news,    url: https://www.indiangaming.org/feed/}
+  - {id: bia-news,            name: Bureau of Indian Affairs,     kind: rss, tier: 2, desk_hint: news,    url: https://www.bia.gov/news/rss.xml}
+  - {id: ihs-news,            name: Indian Health Service,        kind: rss, tier: 2, desk_hint: news,    url: https://www.ihs.gov/newsroom/pressreleases/rss/}
+  - {id: choctaw-nation,      name: Choctaw Nation,               kind: rss, tier: 2, desk_hint: news,    url: https://www.choctawnation.com/news/feed/}
+  # ── Tier 3: wide net ────────────────────────────────────────────────────
+  - id: gnews-news
+    name: Google News
+    kind: rss
+    tier: 3
+    desk_hint: news
+    url: 'https://news.google.com/rss/search?q=%22Native+American%22+OR+%22tribal+nation%22+OR+%22Indian+Country%22&hl=en-US&gl=US&ceid=US:en'
+  - id: gnews-culture
+    name: Google News
+    kind: rss
+    tier: 3
+    desk_hint: culture
+    url: 'https://news.google.com/rss/search?q=%22Native+American%22+(actor+OR+singer+OR+athlete+OR+film+OR+series+OR+album+OR+powwow)&hl=en-US&gl=US&ceid=US:en'
+  - {id: aptn,                name: APTN News,                    kind: rss, tier: 3, desk_hint: news,    url: https://www.aptnnews.ca/feed/, active: false}
+  # ── Culture supply ──────────────────────────────────────────────────────
+  - {id: powwows,             name: Powwows.com,                  kind: rss, tier: 1, desk_hint: culture, url: https://www.powwows.com/feed/}
+  - {id: native-max,          name: Native Max Magazine,          kind: rss, tier: 1, desk_hint: culture, url: https://nativemaxmagazine.com/feed/}
+  - {id: nammys,              name: Native American Music Awards, kind: rss, tier: 2, desk_hint: culture, url: https://www.nativeamericanmusicawards.com/feed/}
+  # ── Tier 4: social ──────────────────────────────────────────────────────
+  - {id: bsky-indian-country, name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: any,     query: '"Indian Country"'}
+  - {id: bsky-native-american, name: Bluesky,                     kind: bluesky, tier: 4, desk_hint: any,     query: '"Native American"'}
+  - {id: bsky-ndn,            name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: any,     query: '#NDN'}
+  - {id: bsky-indigenous,     name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: any,     query: '#Indigenous'}
+  - {id: r-indiancountry,     name: r/IndianCountry,              kind: reddit,  tier: 4, desk_hint: any,     subreddit: IndianCountry}
+  - {id: r-nativeamerican,    name: r/NativeAmerican,             kind: reddit,  tier: 4, desk_hint: any,     subreddit: NativeAmerican}
+  - {id: r-indigenouspeoples, name: r/IndigenousPeoples,          kind: reddit,  tier: 4, desk_hint: any,     subreddit: IndigenousPeoples}
+  # YouTube channels are added in Task 8 once channel ids are confirmed.

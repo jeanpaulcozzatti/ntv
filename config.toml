@@ -1,0 +1,13 @@
+# NTVstreams runtime configuration. Every key is optional; these are the defaults.
+model = "claude-opus-5-5"
+effort = "medium"
+window_hours = 48
+monthly_input_token_ceiling = 5000000
+data_dir = "data"
+out_dir = "out"
+site_url = ""
+timezone = "America/Los_Angeles"
+
+[publish]
+backend = "local"
+target = "out"
