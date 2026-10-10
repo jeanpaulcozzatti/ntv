@@ -115,6 +115,8 @@ class AnthropicCurator:
             raise CuratorError(f"api status {e.status_code}: {e.message}") from e
         except anthropic.APIConnectionError as e:
             raise CuratorError(f"connection: {e}") from e
+        except Exception as e:  # anything else the SDK raises (missing credentials, bad params) must not break the page
+            raise CuratorError(f"{e.__class__.__name__}: {e}") from e
         if response.stop_reason == "refusal":
             raise CuratorError("refusal")
         text = next((b.text for b in response.content if b.type == "text"), "")

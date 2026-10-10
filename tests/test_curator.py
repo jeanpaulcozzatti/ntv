@@ -207,3 +207,22 @@ def test_live_prompt_prints_result(store):
     for s in store.active_stories():
         members = store.story_members(s.id)
         print(f"[{s.desk}] #{s.rank} {s.headline}  (lead {s.lead_item_id}, {len(members)} members)  -- {s.rationale}")
+
+
+def test_anthropic_curator_wraps_any_sdk_exception():
+    from ntvstreams.curator import AnthropicCurator
+
+    class Msgs:
+        def create(self, **kw):
+            raise TypeError("Could not resolve authentication method")
+
+    class Beta:
+        messages = Msgs()
+
+    class Client:
+        beta = Beta()
+
+    cur = AnthropicCurator("claude-opus-5-5", "medium", client=Client())
+    with pytest.raises(CuratorError) as exc:
+        cur.complete("sys", "user")
+    assert "authentication" in str(exc.value)

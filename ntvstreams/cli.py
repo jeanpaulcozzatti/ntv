@@ -10,8 +10,12 @@ from pathlib import Path
 import httpx
 
 from .config import load_config
+from .curator import AnthropicCurator, curate_stage
 from .fetchers import USER_AGENT, get_fetcher
 from .models import SourceState
+from .pipeline import AlreadyRunning, fetch_stage, run_all, run_lock, write_status
+from .publish import get_publisher
+from .render import build_page_data, render_site
 from .sources import load_sources
 from .store import Store
 
@@ -53,9 +57,24 @@ def main(argv: list[str] | None = None) -> int:
         return check_sources(sources, now)
 
     store = Store(config.data_dir / "ntv.db")
-    if args.command == "fetch":
-        from .pipeline import fetch_stage
+    sources_by_id = {s.id: s for s in sources}
 
+    if args.command == "run":
+        try:
+            with run_lock(config.data_dir / "lock"):
+                with _http() as http:
+                    run = run_all(config, sources, store, http, AnthropicCurator(config.model, config.effort),
+                                  get_publisher(config), now, dry_run=args.dry_run)
+        except AlreadyRunning as e:
+            print(f"already running: {e}", file=sys.stderr)
+            return 3
+        print(f"run {run.id}: {run.stage_reached}; new items {run.items_new}; curated {run.curated}; "
+              f"tokens in/out/cached {run.input_tokens}/{run.output_tokens}/{run.cache_read_tokens}; errors {len(run.errors)}")
+        for err in run.errors:
+            print(f"  {err.get('source_id') or err.get('stage')}: {err['message']}")
+        return 1 if run.errors else 0
+
+    if args.command == "fetch":
         with _http() as http:
             summary = fetch_stage(sources, store, http, now)
         print(f"new items: {summary.items_new}; errors: {len(summary.errors)}")
@@ -63,7 +82,32 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {err['source_id']}: {err['message']}")
         return 1 if summary.errors else 0
 
-    print(f"{args.command}: not implemented yet", file=sys.stderr)
+    if args.command == "curate":
+        run = store.start_run(now)
+        outcome = curate_stage(store, AnthropicCurator(config.model, config.effort), config, sources_by_id, run.id, now)
+        run.curated, run.finished_at, run.stage_reached = outcome.curated, now, "curate"
+        run.input_tokens, run.output_tokens, run.cache_read_tokens = outcome.input_tokens, outcome.output_tokens, outcome.cache_read_tokens
+        if outcome.error:
+            run.errors.append({"stage": "curate", "message": f"{outcome.reason}: {outcome.error}"})
+        store.finish_run(run)
+        print(f"curate: {outcome.reason}; tokens in/out/cached {outcome.input_tokens}/{outcome.output_tokens}/{outcome.cache_read_tokens}"
+              + (f"; error: {outcome.error}" if outcome.error else ""))
+        return 0 if outcome.curated or outcome.reason in ("no_new_items", "token_ceiling") else 1
+
+    if args.command == "render":
+        paths = render_site(build_page_data(store, sources, config, now), config.out_dir)
+        last = store.last_run()
+        if last:
+            write_status(last, store, sources, config.out_dir)
+        print(f"rendered {len(paths)} files to {config.out_dir}")
+        return 0
+
+    if args.command == "publish":
+        for action in get_publisher(config).publish(config.out_dir, dry_run=args.dry_run):
+            print(action)
+        return 0
+
+    print(f"{args.command}: not implemented", file=sys.stderr)
     return 2
 
 
