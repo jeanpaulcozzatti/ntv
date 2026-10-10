@@ -1,0 +1,81 @@
+{
+ "stories": [
+  {
+   "id": null,
+   "desk": "news",
+   "headline": "Supreme Court leaves tribal jurisdiction ruling in place",
+   "lead_item_id": "item000000000001",
+   "coverage_item_ids": [
+    "item000000000002",
+    "item000000000003"
+   ],
+   "discussion_item_ids": [
+    "item000000000004",
+    "item000000000005"
+   ],
+   "rank": 1,
+   "rationale": "Highest-court action on sovereignty; broad coverage."
+  },
+  {
+   "id": null,
+   "desk": "news",
+   "headline": "Interior sends $120 million to tribal water systems",
+   "lead_item_id": "item000000000006",
+   "coverage_item_ids": [
+    "item000000000007"
+   ],
+   "discussion_item_ids": [
+    "item000000000008"
+   ],
+   "rank": 2,
+   "rationale": "Federal funding, many tribes."
+  },
+  {
+   "id": null,
+   "desk": "news",
+   "headline": "Tribes oppose lithium mine permit near sacred site",
+   "lead_item_id": "item000000000012",
+   "coverage_item_ids": [
+    "item000000000013",
+    "item000000000015"
+   ],
+   "discussion_item_ids": [
+    "item000000000014"
+   ],
+   "rank": 3,
+   "rationale": "Land and sacred sites."
+  },
+  {
+   "id": null,
+   "desk": "culture",
+   "headline": "Sterlin Harjo announces a new FX series set in Tulsa",
+   "lead_item_id": "item000000000021",
+   "coverage_item_ids": [
+    "item000000000022"
+   ],
+   "discussion_item_ids": [
+    "item000000000023"
+   ],
+   "rank": 1,
+   "rationale": "Major Native creator."
+  },
+  {
+   "id": null,
+   "desk": "culture",
+   "headline": "Lily Gladstone joins an indie drama shooting in Montana",
+   "lead_item_id": "item000000000024",
+   "coverage_item_ids": [
+    "item000000000025"
+   ],
+   "discussion_item_ids": [],
+   "rank": 2,
+   "rationale": "Casting news."
+  }
+ ],
+ "unplaced_item_ids": [
+  "item000000000009",
+  "item000000000010",
+  "item000000000011",
+  "item000000000016"
+ ]
+}
