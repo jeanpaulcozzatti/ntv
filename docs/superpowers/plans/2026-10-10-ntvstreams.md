@@ -246,6 +246,8 @@ ntv/
   def get_fetcher(kind: Kind) -> Fetcher        # in fetchers/__init__.py; registry dict
   def ok_state(state, now) -> SourceState         # last_success_at=now, consecutive_fails=0, last_error=None
   def fail_state(state, error) -> SourceState     # consecutive_fails+1, last_error=error
+  def make_resolver(http: httpx.Client) -> Callable[[str], str | None]
+      # HEAD with follow_redirects, timeout 2 s; returns final URL or None on any error; fetchers pass this to canonicalize
   # rss.py
   class RssFetcher:  # sends If-None-Match / If-Modified-Since from state; 304 -> no items, ok_state
   ```
@@ -359,6 +361,7 @@ ntv/
                          sources_by_id: dict[str, Source]) -> str   # two JSON blocks, keys sorted
   @dataclass
   class CuratorResponse: text: str; input_tokens: int; output_tokens: int; cache_read_tokens: int
+  class CuratorError(Exception): ...   # raised by CuratorClient.complete on API error or refusal
   class CuratorClient(Protocol):
       def complete(self, system: str, user: str) -> CuratorResponse: ...
   class AnthropicCurator:
@@ -440,7 +443,7 @@ ntv/
   def test_every_link_is_an_item_or_page(rendered): ...
   def test_more_and_discussion_lines(rendered): ... # "More:" lists coverage source names; "Discussion:" shows "@handle" and "r/IndianCountry"; omitted when empty
   def test_no_exclamation_or_script(rendered): ... # "!" not in any html text node (allow <!doctype>), "<script" absent
-  def test_river_hour_groups_in_pt_across_dst(): ... # 2026-11-01 08:30Z and 09:30Z fall on both sides of PDT->PST: labels "1 AM" then "1 AM"? assert labels computed via zoneinfo, not fixed offset: 08:30Z -> "1 AM", 09:30Z -> "1 AM" (DST ends 09:00Z); and 10:30Z -> "2 AM"
+  def test_river_hour_groups_in_pt_across_dst(): ... # DST ends 2026-11-01 09:00Z. hour_group of 08:30Z, 09:30Z, 10:30Z == ["1 AM", "1 AM", "2 AM"] (a fixed -7 offset would wrongly give "2 AM" for 09:30Z)
   def test_sources_page_marks_stale(rendered): ... # consecutive_fails >= 24 -> text "stale"
   def test_feed_xml_valid(rendered): ... # parses with xml.etree; item count == 6; guid == story id
   def test_golden_index(rendered): ... # compare to fixtures/golden_index.html after normalizing whitespace; regenerate with UPDATE_GOLDEN=1
