@@ -1,0 +1,34 @@
+{
+  "posts": [
+    {
+      "uri": "at://did:plc:abc123/app.bsky.feed.post/3kxyz001",
+      "cid": "bafy1",
+      "author": {"did": "did:plc:abc123", "handle": "ictnews.bsky.social", "displayName": "ICT"},
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Court rules in favor of tribe in long-running water case. Our story: ",
+        "createdAt": "2026-10-10T12:30:00.000Z",
+        "embed": {"$type": "app.bsky.embed.external", "external": {"uri": "https://ictnews.org/news/x?utm_source=bsky", "title": "Court rules for tribe in water case", "description": "A federal judge sided with the tribe on Thursday."}}
+      },
+      "embed": {"$type": "app.bsky.embed.external#view", "external": {"uri": "https://ictnews.org/news/x?utm_source=bsky", "title": "Court rules for tribe in water case", "description": "A federal judge sided with the tribe on Thursday."}},
+      "likeCount": 40, "repostCount": 12, "replyCount": 3
+    },
+    {
+      "uri": "at://did:plc:def456/app.bsky.feed.post/3kxyz002",
+      "cid": "bafy2",
+      "author": {"did": "did:plc:def456", "handle": "photog.bsky.social"},
+      "record": {"$type": "app.bsky.feed.post", "text": "", "createdAt": "2026-10-10T11:00:00.000Z",
+                 "embed": {"$type": "app.bsky.embed.images", "images": [{"alt": "", "image": {}}]}},
+      "embed": {"$type": "app.bsky.embed.images#view", "images": [{"thumb": "https://cdn/x.jpg", "fullsize": "https://cdn/x.jpg", "alt": ""}]},
+      "likeCount": 2, "repostCount": 0, "replyCount": 0
+    },
+    {
+      "uri": "at://did:plc:ghi789/app.bsky.feed.post/3kxyz003",
+      "cid": "bafy3",
+      "author": {"did": "did:plc:ghi789", "handle": "someone.bsky.social", "displayName": "Someone"},
+      "record": {"$type": "app.bsky.feed.post", "text": "Big news out of Indian Country today.\nThread below.", "createdAt": "2026-10-10T10:00:00.000Z"},
+      "likeCount": 5, "repostCount": 1, "replyCount": 0
+    }
+  ],
+  "cursor": "abc"
+}

@@ -1,0 +1,12 @@
+{
+  "feed": [
+    {"post": {"uri": "at://did:plc:aaa/app.bsky.feed.post/3kaaa001", "cid": "c1",
+              "author": {"did": "did:plc:aaa", "handle": "nativenewsonline.bsky.social", "displayName": "Native News Online"},
+              "record": {"$type": "app.bsky.feed.post", "text": "Morning headlines from Indian Country", "createdAt": "2026-10-10T13:00:00.000Z"},
+              "likeCount": 9, "repostCount": 2, "replyCount": 0}},
+    {"post": {"uri": "at://did:plc:aaa/app.bsky.feed.post/3kaaa002", "cid": "c2",
+              "author": {"did": "did:plc:aaa", "handle": "nativenewsonline.bsky.social", "displayName": "Native News Online"},
+              "record": {"$type": "app.bsky.feed.post", "text": "Second post", "createdAt": "2026-10-10T12:00:00.000Z"},
+              "likeCount": 1, "repostCount": 0, "replyCount": 0}}
+  ]
+}
