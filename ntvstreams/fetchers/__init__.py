@@ -7,8 +7,9 @@ from .base import USER_AGENT, FetchResult, Fetcher, fail_state, make_resolver, o
 from .bluesky import BlueskyFetcher
 from .reddit import RedditFetcher
 from .rss import RssFetcher
+from .youtube import YoutubeFetcher
 
-_REGISTRY: dict[str, Fetcher] = {"rss": RssFetcher(), "bluesky": BlueskyFetcher(), "reddit": RedditFetcher()}
+_REGISTRY: dict[str, Fetcher] = {"rss": RssFetcher(), "bluesky": BlueskyFetcher(), "reddit": RedditFetcher(), "youtube": YoutubeFetcher()}
 
 
 def register(kind: str, fetcher: Fetcher) -> None:

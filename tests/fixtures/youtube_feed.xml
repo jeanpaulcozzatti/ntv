@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+  <id>yt:channel:UCabc</id>
+  <yt:channelId>UCabc</yt:channelId>
+  <title>Native America Calling</title>
+  <entry>
+    <id>yt:video:vid001</id>
+    <yt:videoId>vid001</yt:videoId>
+    <title>Friday, October 10, 2026 - The future of tribal broadband</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=vid001"/>
+    <author><name>Native America Calling</name></author>
+    <published>2026-10-10T12:00:00+00:00</published>
+    <media:group>
+      <media:title>Friday, October 10, 2026 - The future of tribal broadband</media:title>
+      <media:description>Tribal nations are building their own networks. We talk with three of them.</media:description>
+      <media:community><media:starRating count="12"/><media:statistics views="1234"/></media:community>
+    </media:group>
+  </entry>
+  <entry>
+    <id>yt:video:vid002</id>
+    <yt:videoId>vid002</yt:videoId>
+    <title>Thursday, October 9, 2026 - Powwow season wrap</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=vid002"/>
+    <author><name>Native America Calling</name></author>
+    <published>2026-10-09T12:00:00+00:00</published>
+    <media:group><media:description>Dancers and drum groups look back.</media:description></media:group>
+  </entry>
+</feed>
