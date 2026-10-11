@@ -116,7 +116,7 @@ Fetchers per kind:
 Every URL below is **unverified** at spec time. Task 1 of the
 implementation plan fetches each one, drops dead feeds, and finds
 replacements. The desk mix must leave the Culture & Sports desk, the main
-column, with enough supply to fill twelve stories on a normal day.
+column, with enough supply to fill thirty-two stories on a normal day.
 
 **Tier 1, Native-run press (desk_hint news unless noted)**
 ICT (ictnews.org), Native News Online, Indianz.com, Tribal Business News,
@@ -303,7 +303,7 @@ In priority order:
 
 ### 7.3 Hard limits (enforced in code, not trusted to the model)
 
-- Culture & Sports desk: at most 32 stories; 12 shown on the front page.
+- Culture & Sports desk: at most 48 stories; 32 shown on the front page.
 - News desk: at most 8 stories; all shown. Never padded.
 - Every `lead_item_id`, coverage id, and discussion id must exist in the
   database and belong to at most one story.
@@ -362,12 +362,12 @@ Front Page · River · Sources · About. Current page in `--brand` with a
 1px underline.
 
 **Culture & Sports desk (main column).** Section kicker `CULTURE & SPORTS` in mono caps,
-`--ls-mono`, `--muted`, under a 2px ink rule. Then up to 12 story blocks:
+`--ls-mono`, `--muted`, under a 2px ink rule. Then up to 32 story blocks:
 
 - Kicker line, mono 10.5px caps: lead source name in `--brand`, author if
   known, relative age (`2h`, `yesterday`), separated by middle dots.
 - Headline in Newsreader 400, linked to the lead URL. Story 1 at 32px /
-  line-height 1.05; stories 2 to 12 at 24px / 1.1. Color `--ink`; hover
+  line-height 1.05; stories 2 to 32 at 24px / 1.1. Color `--ink`; hover
   underlines in `--brand`.
 - `More:` line, sans 13.5px, `--ink-soft`: every coverage outlet by name,
   each a link, comma separated.
@@ -506,7 +506,7 @@ Each unit is testable without network or model.
 - **Store.** Temp-file SQLite: insert, dedupe on re-insert, prune by age,
   items-since query, atomic story replacement.
 - **Curator.** Fake client with canned `PageOut` responses. Assert: the
-  culture cap of 32 and news cap of 8 are enforced, an item the model
+  culture cap of 48 and news cap of 8 are enforced, an item the model
   omits lands in the river, a story with no lead rejects the response
   and the previous page is kept, a once-invalid response is retried with
   errors appended, tokens land in `runs`. One opt-in live test runs the

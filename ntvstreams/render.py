@@ -18,7 +18,7 @@ from .store import Store
 
 TEMPLATES = Path(__file__).parent / "templates"
 STATIC = Path(__file__).parent / "static"
-CULTURE_SHOWN = 12  # main column; the cap is higher, the rest stay in the River and the feed order below the fold
+CULTURE_SHOWN = 32  # main column; the cap is higher, the rest stay in the River
 NEWS_SHOWN = 8      # side column; never padded
 RIVER_ON_INDEX = 60
 STALE_AFTER = 24
