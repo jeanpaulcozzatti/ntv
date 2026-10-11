@@ -66,7 +66,19 @@ def test_active_stories_ordered_by_desk_then_rank(store):
         make_story("N1", desk="news", lead_item_id="a" * 16, rank=1),
     ]
     store.replace_page(stories, [StoryMember(s.id, s.lead_item_id, "lead") for s in stories], "R1", NOW)
-    assert [s.id for s in store.active_stories()] == ["N1", "N2", "C1"]
+    assert [s.id for s in store.active_stories()] == ["C1", "N1", "N2"]
+
+
+def test_active_stories_orders_regional_desks_after_news(store):
+    store.upsert_items([make_item(c * 16) for c in "abcd"])
+    stories = [
+        make_story("P1", desk="pnw", lead_item_id="d" * 16, rank=1),
+        make_story("H1", desk="choctaw", lead_item_id="c" * 16, rank=1),
+        make_story("N1", desk="news", lead_item_id="b" * 16, rank=1),
+        make_story("C1", desk="culture", lead_item_id="a" * 16, rank=1),
+    ]
+    store.replace_page(stories, [StoryMember(s.id, s.lead_item_id, "lead") for s in stories], "R1", NOW)
+    assert [s.id for s in store.active_stories()] == ["C1", "N1", "H1", "P1"]
 
 
 def test_expire_stories_older_than(store):

@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any, Literal
 
 ItemKind = Literal["article", "post", "video"]
-DeskName = Literal["news", "culture"]
+DeskName = Literal["news", "culture", "choctaw", "pnw"]
 Role = Literal["lead", "coverage", "discussion"]
 
 

@@ -5,7 +5,7 @@
 <link>{{ data.site_url or 'index.html' }}</link>
 <description>Native American news and social media, grouped and ranked hourly.</description>
 <lastBuildDate>{{ data.updated_at | rfc822 }}</lastBuildDate>
-{% for sv in data.culture + data.news %}
+{% for sv in data.culture + data.news + data.choctaw + data.pnw %}
 <item>
 <title>{{ sv.story.headline }}</title>
 <link>{{ sv.lead.url }}</link>

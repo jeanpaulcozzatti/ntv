@@ -167,7 +167,7 @@ class Store:
     def active_stories(self) -> list[Story]:
         rows = self.conn.execute(
             """SELECT * FROM stories WHERE expired_at IS NULL
-               ORDER BY CASE desk WHEN 'news' THEN 0 ELSE 1 END, rank"""
+               ORDER BY CASE desk WHEN 'culture' THEN 0 WHEN 'news' THEN 1 WHEN 'choctaw' THEN 2 ELSE 3 END, rank"""
         ).fetchall()
         return [_row_story(r) for r in rows]
 

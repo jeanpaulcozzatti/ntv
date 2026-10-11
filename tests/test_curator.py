@@ -7,9 +7,11 @@ import pytest
 
 from ntvstreams.config import Config
 from ntvstreams.curator import (
+    CHOCTAW_MAX,
     CULTURE_MAX,
     HEADLINE_MAX,
     NEWS_MAX,
+    PNW_MAX,
     SYSTEM_PROMPT,
     CuratorError,
     CuratorResponse,
@@ -86,9 +88,10 @@ def test_applies_valid_page(seeded):
     out = curate_stage(seeded, fake, CFG, SOURCES, "R1", NOW)
     assert out.curated is True and out.input_tokens == 1000 and out.output_tokens == 300 and out.cache_read_tokens == 800
     stories = seeded.active_stories()
-    assert [s.desk for s in stories] == ["news", "news", "news", "culture", "culture"]
-    assert stories[0].headline == "Supreme Court leaves tribal jurisdiction ruling in place" and stories[0].run_id == "R1"
-    roles = {(m.item_id, m.role) for m in seeded.story_members(stories[0].id)}
+    assert [s.desk for s in stories] == ["culture", "culture", "news", "news", "news"]
+    court = next(s for s in stories if s.desk == "news" and s.rank == 1)
+    assert court.headline == "Supreme Court leaves tribal jurisdiction ruling in place" and court.run_id == "R1"
+    roles = {(m.item_id, m.role) for m in seeded.story_members(court.id)}
     assert roles == {("item000000000001", "lead"), ("item000000000002", "coverage"), ("item000000000003", "coverage"),
                      ("item000000000004", "discussion"), ("item000000000005", "discussion")}
     assert len(fake.calls) == 1 and fake.calls[0][0] == SYSTEM_PROMPT
@@ -160,6 +163,21 @@ def test_validate_rejects_culture_over_cap_and_news_over_cap():
     assert any("culture" in e for e in validate_page(PageOut(stories=culture, unplaced_item_ids=[]), ids, set()))
     news = [_story(desk="news", lead_item_id=f"i{n}", rank=n + 1) for n in range(NEWS_MAX + 1)]
     assert any("news" in e for e in validate_page(PageOut(stories=news, unplaced_item_ids=[]), ids, set()))
+
+
+def test_validate_rejects_regional_desks_over_cap():
+    ids = {f"i{n}" for n in range(60)}
+    for desk, cap in (("choctaw", CHOCTAW_MAX), ("pnw", PNW_MAX)):
+        stories = [_story(desk=desk, lead_item_id=f"i{n}", rank=n + 1) for n in range(cap + 1)]
+        assert any(desk in e for e in validate_page(PageOut(stories=stories, unplaced_item_ids=[]), ids, set()))
+        ok = [_story(desk=desk, lead_item_id=f"i{n}", rank=n + 1) for n in range(cap)]
+        assert validate_page(PageOut(stories=ok, unplaced_item_ids=[]), ids, set()) == []
+
+
+def test_prompt_names_regional_desks_and_cno():
+    assert "choctaw:" in SYSTEM_PROMPT and "pnw:" in SYSTEM_PROMPT
+    assert "Choctaw Nation of Oklahoma" in SYSTEM_PROMPT and "CNO" in SYSTEM_PROMPT
+    assert f"{CHOCTAW_MAX} choctaw stories" in SYSTEM_PROMPT and f"{PNW_MAX} pnw stories" in SYSTEM_PROMPT
 
 
 def test_validate_rejects_duplicate_rank_within_desk():

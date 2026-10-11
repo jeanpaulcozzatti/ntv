@@ -39,11 +39,13 @@ def _story_view(n: int, desk: str, rank: int, with_discussion: bool = True) -> S
 def page_data() -> PageData:
     culture = [_story_view(n, "culture", n, with_discussion=(n != 4)) for n in range(1, 5)]
     news = [_story_view(n + 10, "news", n) for n in range(1, 3)]
+    choctaw = [_story_view(n + 20, "choctaw", n) for n in range(1, 3)]
+    pnw = [_story_view(n + 30, "pnw", n) for n in range(1, 3)]
     river = [make_item(f"riv{n:013d}", source_id=["ict", "bsky", "reddit", "yt"][n % 4], kind=["article", "post", "post", "video"][n % 4],
                        title=f"River item {n}" + (" <b>bold</b>" if n == 0 else ""), published_at=NOW.replace(minute=0) - __import__("datetime").timedelta(minutes=37 * n),
                        raw={"handle": "h.bsky.social", "subreddit": "IndianCountry"}) for n in range(70)]
     states = {"ict": SourceState("ict", last_success_at=NOW), "bsky": SourceState("bsky", consecutive_fails=24, last_error="http 500")}
-    return PageData(updated_at=NOW, news=news, culture=culture, river=river, sources_by_id=SRC, states=states, site_url="")
+    return PageData(updated_at=NOW, news=news, culture=culture, river=river, sources_by_id=SRC, states=states, site_url="", choctaw=choctaw, pnw=pnw)
 
 
 @pytest.fixture
@@ -69,12 +71,14 @@ def test_index_structure(rendered):
     main = html[html.index('<main'):html.index('</main>')]
     aside = html[html.index('<aside'):html.index('</aside>')]
     assert main.count('<article class="story') == 4 and main.count("story--top") == 1
-    assert aside.count('<article class="story') == 2
+    assert aside.count('<article class="story') == 6
     assert "NTVstreams" in html and "UPDATED 06:40 PT" in html
     assert html.index("Headline culture 1") < html.index("Headline culture 2") < html.index("Headline culture 4")
     assert html.index("Headline news 11") < html.index("Headline news 12")
     assert "Culture &amp; Sports" in main and "News" not in _text(main).replace("Navajo", "")
     assert "News" in aside and "Culture" not in aside
+    assert aside.index("News") < aside.index("Choctaw") < aside.index("Pacific Northwest Tribes") < aside.index("River")
+    assert html.index("Headline choctaw 21") < html.index("Headline pnw 31")
     assert 'class="current"' in html and ">Front Page<" in html
 
 
@@ -91,7 +95,7 @@ def test_more_and_discussion_lines(rendered):
 def test_every_link_is_an_item_or_page(rendered, page_data):
     hrefs = set(re.findall(r'href="([^"]+)"', rendered["index.html"]))
     allowed = {"index.html", "river.html", "sources.html", "about.html", "feed.xml", "static/site.css", "static/colors_and_type.css", "static/favicon.svg"}
-    item_urls = {i.url for sv in page_data.news + page_data.culture for i in [sv.lead, *[c for c, _ in sv.coverage], *[d for d, _ in sv.discussion]]}
+    item_urls = {i.url for sv in page_data.news + page_data.culture + page_data.choctaw + page_data.pnw for i in [sv.lead, *[c for c, _ in sv.coverage], *[d for d, _ in sv.discussion]]}
     item_urls |= {i.url for i in page_data.river}
     assert hrefs <= allowed | item_urls, hrefs - (allowed | item_urls)
 
@@ -138,8 +142,8 @@ def test_sources_page_marks_stale(rendered):
 def test_feed_xml_valid(rendered, page_data):
     root = ET.fromstring(rendered["feed.xml"])
     items = root.findall("./channel/item")
-    assert len(items) == 6
-    assert {i.findtext("guid") for i in items} == {sv.story.id for sv in page_data.news + page_data.culture}
+    assert len(items) == 10
+    assert {i.findtext("guid") for i in items} == {sv.story.id for sv in page_data.news + page_data.culture + page_data.choctaw + page_data.pnw}
     assert items[0].findtext("link") == page_data.culture[0].lead.url
     assert "Navajo Times" in items[0].findtext("description")
 
@@ -154,9 +158,18 @@ def test_golden_index(rendered):
 
 
 def test_empty_desks_show_placeholder(page_data, tmp_path):
-    page_data.news, page_data.culture = [], []
+    page_data.news, page_data.culture, page_data.choctaw, page_data.pnw = [], [], [], []
     render_site(page_data, tmp_path)
     html = (tmp_path / "index.html").read_text()
     main = html[html.index("<main"):html.index("</main>")]
     assert "No stories yet" in main and "River" in main
-    assert "News" not in html[html.index("<aside"):html.index("</aside>")]
+    aside = html[html.index("<aside"):html.index("</aside>")]
+    assert "News" not in aside and "Choctaw" not in aside and "Pacific Northwest" not in aside
+
+
+def test_regional_sections_hidden_when_empty(page_data, tmp_path):
+    page_data.choctaw = []
+    render_site(page_data, tmp_path)
+    aside = (tmp_path / "index.html").read_text()
+    aside = aside[aside.index("<aside"):aside.index("</aside>")]
+    assert "Choctaw" not in aside and "Pacific Northwest Tribes" in aside and "News" in aside

@@ -12,9 +12,8 @@ sources:
   - {id: navajo-times,        name: Navajo Times,                 kind: rss, tier: 1, desk_hint: news,    url: 'https://news.google.com/rss/search?q=site:navajotimes.com&hl=en-US&gl=US&ceid=US:en'}  # site blocks feed readers; Google News proxy
   - {id: cherokee-phoenix,    name: Cherokee Phoenix,             kind: rss, tier: 1, desk_hint: news,    url: 'https://www.cherokeephoenix.org/search/?f=rss&t=article&l=50&s=start_time&sd=desc'}
   - {id: osage-news,          name: Osage News,                   kind: rss, tier: 1, desk_hint: news,    url: https://osagenews.org/feed/}
-  - {id: biskinik,            name: Biskinik,                     kind: rss, tier: 1, desk_hint: news,    url: 'https://news.google.com/rss/search?q=site:choctawnation.com+biskinik&hl=en-US&gl=US&ceid=US:en'}  # no feed; Google News proxy
   - {id: mvskoke-media,       name: Mvskoke Media,                kind: rss, tier: 1, desk_hint: news,    url: https://www.mvskokemedia.com/feed/}
-  - {id: tulalip-news,        name: Tulalip News,                 kind: rss, tier: 1, desk_hint: news,    url: https://www.tulalipnews.com/feed/}
+  - {id: tulalip-news,        name: Tulalip News,                 kind: rss, tier: 1, desk_hint: pnw,     url: https://www.tulalipnews.com/feed/}
   - {id: lakota-times,        name: Lakota Times,                 kind: rss, tier: 1, desk_hint: news,    url: https://www.lakotatimes.com/feed/}
   - {id: alaska-native-news,  name: Alaska Native News,           kind: rss, tier: 1, desk_hint: news,    url: https://alaska-native-news.com/feed/}
   - {id: underscore-news,     name: Underscore News,              kind: rss, tier: 1, desk_hint: news,    url: https://www.underscore.news/feed}
@@ -29,7 +28,6 @@ sources:
   - {id: indian-gaming,       name: Indian Gaming Association,    kind: rss, tier: 2, desk_hint: news,    url: https://www.indiangaming.org/feed/}
   - {id: bia-news,            name: Bureau of Indian Affairs,     kind: rss, tier: 2, desk_hint: news,    url: https://www.bia.gov/rss.xml}
   - {id: ihs-news,            name: Indian Health Service,        kind: rss, tier: 2, desk_hint: news,    url: 'https://news.google.com/rss/search?q=site:ihs.gov&hl=en-US&gl=US&ceid=US:en'}  # no feed; Google News proxy
-  - {id: choctaw-nation,      name: Choctaw Nation,               kind: rss, tier: 2, desk_hint: news,    url: 'https://news.google.com/rss/search?q=site:choctawnation.com&hl=en-US&gl=US&ceid=US:en'}  # no feed; Google News proxy
   # ── Tier 3: wide net ────────────────────────────────────────────────────
   - id: gnews-news
     name: Google News
@@ -44,6 +42,33 @@ sources:
     desk_hint: culture
     url: 'https://news.google.com/rss/search?q=%22Native+American%22+(actor+OR+singer+OR+athlete+OR+film+OR+series+OR+album+OR+powwow)&hl=en-US&gl=US&ceid=US:en'
   - {id: aptn,                name: APTN News,                    kind: rss, tier: 3, desk_hint: news,    url: https://www.aptnnews.ca/feed/, active: false}
+  # ── Choctaw desk: CNO first ─────────────────────────────────────────────
+  # CNO has no RSS feed; its WordPress REST API serves the news posts (Biskinik is monthly PDF archives only).
+  - {id: cno-news,           name: Choctaw Nation,               kind: wordpress, tier: 2, desk_hint: choctaw, url: https://www.choctawnation.com/wp-json/wp/v2/news}
+  - {id: mbci,               name: Mississippi Band of Choctaw,  kind: rss, tier: 2, desk_hint: choctaw, url: https://www.choctaw.org/feed/}
+  - id: gnews-choctaw
+    name: Google News
+    kind: rss
+    tier: 3
+    desk_hint: choctaw
+    url: 'https://news.google.com/rss/search?q=%22Choctaw+Nation%22+OR+%22Mississippi+Band+of+Choctaw%22+OR+%22Jena+Band+of+Choctaw%22+OR+%22Choctaw+Cultural+Center%22&hl=en-US&gl=US&ceid=US:en'
+  # ── Pacific Northwest tribes desk ───────────────────────────────────────
+  - {id: ict-pnw,            name: ICT Pacific Northwest,        kind: rss, tier: 1, desk_hint: pnw, url: https://ictnews.org/tag/pacific-northwest/feed}
+  - {id: nwifc,              name: Northwest Indian Fisheries Commission, kind: rss, tier: 2, desk_hint: pnw, url: https://nwifc.org/feed/}
+  - {id: critfc,             name: Columbia River Inter-Tribal Fish Commission, kind: rss, tier: 2, desk_hint: pnw, url: https://critfc.org/feed/}
+  - {id: npaihb,             name: Northwest Portland Area Indian Health Board, kind: rss, tier: 2, desk_hint: pnw, url: https://www.npaihb.org/feed/}
+  - {id: spilyay-tymoo,      name: Spilyay Tymoo (Warm Springs), kind: rss, tier: 1, desk_hint: pnw, url: https://spilyaytymoo.com/feed/}
+  - {id: puyallup-tribe,     name: Puyallup Tribe,               kind: rss, tier: 2, desk_hint: pnw, url: https://www.puyallup-tribe.com/feed/}
+  - {id: snoqualmie-tribe,   name: Snoqualmie Tribe,             kind: rss, tier: 2, desk_hint: pnw, url: https://www.snoqualmietribe.us/feed/}
+  - {id: spokane-tribe,      name: Spokane Tribe,                kind: rss, tier: 2, desk_hint: pnw, url: https://www.spokanetribe.com/feed/}
+  - {id: squaxin-island,     name: Squaxin Island Tribe,         kind: rss, tier: 2, desk_hint: pnw, url: https://www.squaxinisland.org/feed/}
+  - {id: suquamish-tribe,    name: Suquamish Tribe,              kind: rss, tier: 2, desk_hint: pnw, url: https://www.suquamish.nsn.us/feed/}
+  - id: gnews-pnw
+    name: Google News
+    kind: rss
+    tier: 3
+    desk_hint: pnw
+    url: 'https://news.google.com/rss/search?q=%28%22Tulalip%22+OR+%22Muckleshoot%22+OR+%22Suquamish%22+OR+%22Puyallup%22+OR+%22Nisqually%22+OR+%22Squaxin%22+OR+%22Lummi%22+OR+%22Swinomish%22+OR+%22Snoqualmie%22+OR+%22Yakama%22+OR+%22Colville%22+OR+%22Umatilla%22+OR+%22Warm+Springs%22+OR+%22Makah%22+OR+%22Quinault%22+OR+%22Cowlitz%22%29+%28tribe+OR+tribal+OR+nation%29&hl=en-US&gl=US&ceid=US:en'
   # ── Culture supply ──────────────────────────────────────────────────────
   - {id: powwows,             name: Powwows.com,                  kind: rss, tier: 1, desk_hint: culture, url: https://www.powwows.com/feed/}
   - {id: native-max,          name: Native Max Magazine,          kind: rss, tier: 1, desk_hint: culture, url: https://nativemaxmagazine.com/feed/}
@@ -52,6 +77,8 @@ sources:
   - {id: bsky-native-american, name: Bluesky,                     kind: bluesky, tier: 4, desk_hint: any,     query: '"Native American"'}
   - {id: bsky-ndn,            name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: any,     query: '#NDN'}
   - {id: bsky-indigenous,     name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: any,     query: '#Indigenous'}
+  - {id: bsky-choctaw,        name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: choctaw, query: 'Choctaw'}
+  - {id: bsky-critfc,         name: CRITFC (Bluesky),             kind: bluesky, tier: 4, desk_hint: pnw,     actor: critfc.bsky.social}
   - {id: bsky-powwow,         name: Bluesky,                      kind: bluesky, tier: 4, desk_hint: culture, query: 'powwow'}
   # One multireddit request: separate subreddit requests trip Reddit's unauthenticated rate limit.
   - {id: reddit,              name: Reddit,                       kind: reddit,  tier: 4, desk_hint: any,     subreddit: IndianCountry+NativeAmerican+IndigenousPeoples}

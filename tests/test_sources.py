@@ -40,3 +40,12 @@ def test_load_starter_sources():
     assert sum(1 for s in srcs if s.desk_hint == "culture") >= 6
     assert any(s.kind == "reddit" for s in srcs)
     assert any(s.kind == "bluesky" for s in srcs)
+
+
+def test_cno_is_a_choctaw_desk_source():
+    srcs = {s.id: s for s in load_sources(Path("sources.yaml"))}
+    cno = srcs["cno-news"]
+    assert cno.kind == "wordpress" and cno.desk_hint == "choctaw" and cno.active
+    assert "choctawnation.com" in cno.url
+    assert sum(1 for s in srcs.values() if s.desk_hint == "choctaw") >= 3
+    assert sum(1 for s in srcs.values() if s.desk_hint == "pnw") >= 8

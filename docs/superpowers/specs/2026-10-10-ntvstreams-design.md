@@ -28,7 +28,8 @@ trustworthy enough to put a name on.
 - Canonicalize and deduplicate items; attach social posts that link to
   an article as discussion on that article.
 - Claude-driven curation: cluster, pick lead, rank, write headline, and
-  route each story to one of two desks: **News** and **Culture & Sports**.
+  route each story to one of four desks: **Culture & Sports** (main),
+  **News**, **Choctaw**, and **Pacific Northwest Tribes**.
 - Render a static site in the PHYLO editorial design: front page, river,
   sources, about, RSS feed, status JSON.
 - Run hourly on JP's laptop via launchd; publish to a local directory.
@@ -77,10 +78,10 @@ Each stage is independently testable without network or model.
 sources:
   - id: navajo-times            # stable slug, used as foreign key
     name: Navajo Times
-    kind: rss                   # rss | bluesky | reddit | youtube
+    kind: rss                   # rss | bluesky | reddit | youtube | wordpress
     url: https://navajotimes.com/feed/
     tier: 1                     # 1 native-press, 2 institutional, 3 wide-net, 4 social
-    desk_hint: news             # news | culture | any  (hint to the curator, not a rule)
+    desk_hint: news             # news | culture | choctaw | pnw | any  (hint to the curator, not a rule)
     active: true
   - id: bsky-search-indian-country
     name: Bluesky · "Indian Country"
@@ -110,6 +111,7 @@ Fetchers per kind:
 | bluesky | `https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=…` or `app.bsky.feed.getAuthorFeed?actor=…` | none |
 | reddit | `https://www.reddit.com/r/{sub}/new.json?limit=50` with a descriptive User-Agent | none |
 | youtube | `https://www.youtube.com/feeds/videos.xml?channel_id=…` | none |
+| wordpress | a WordPress REST collection URL, e.g. `https://www.choctawnation.com/wp-json/wp/v2/news`, newest 30 by date | none |
 
 ### 4.2 Starter list
 
@@ -283,11 +285,17 @@ In priority order:
 1. **Group** items covering the same event. A tribal paper, a wire story,
    and three Bluesky posts about one ruling are one story. Merge existing
    stories if they turn out to be the same event; keep the older id.
-2. **Desk.** `news`: sovereignty, land, water, treaty and federal policy,
-   courts, elections, health, education, language, economy, environment.
-   `culture`: film, TV, music, fashion, awards, sports, athletes, actors,
-   musicians, influencers, creators, powwows as events. When a story is
-   both, it goes where its consequence is.
+2. **Desk.** Regional desks are checked first. `choctaw`: stories
+   primarily about the Choctaw Nation of Oklahoma (CNO), the Mississippi
+   Band of Choctaw Indians, the Jena Band, or Choctaw people and
+   institutions, whatever the topic. `pnw`: stories primarily about the
+   tribes of Washington, Oregon, Idaho, and the Salish Sea. A passing
+   mention does not make a regional story. Then the topic desks. `news`:
+   sovereignty, land, water, treaty and federal policy, courts, elections,
+   health, education, language, economy, environment. `culture`: film, TV,
+   music, fashion, awards, sports, athletes, actors, musicians,
+   influencers, creators, powwows as events. When a story is both, it goes
+   where its consequence is.
 3. **Lead.** Prefer tier 1 Native press, then the original reporter over
    an aggregator, then the most complete account. A social post leads only
    when it is itself the news.
@@ -305,6 +313,8 @@ In priority order:
 
 - Culture & Sports desk: at most 48 stories; 32 shown on the front page.
 - News desk: at most 8 stories; all shown. Never padded.
+- Choctaw desk: at most 8 stories; all shown. Never padded.
+- Pacific Northwest Tribes desk: at most 12 stories; all shown. Never padded.
 - Every `lead_item_id`, coverage id, and discussion id must exist in the
   database and belong to at most one story.
 - Headline length over 110 characters, a story with no lead, or an
@@ -380,7 +390,11 @@ a 2px ink rule. Up to 8 compact blocks: same kicker line; headline at 19px
 Newsreader; one combined `More:` line that includes discussion; 16px
 padding; hairline below.
 
-**River (right column, below news).** Kicker `RIVER`. Every item from
+**Choctaw and Pacific Northwest Tribes (right column, below News).**
+Same compact blocks and kicker style as News, each under its own 2px ink
+rule. A section is omitted when it has no stories.
+
+**River (right column, below the regional desks).** Kicker `RIVER`. Every item from
 the last 48 hours, newest first, grouped under hour markers (`6 AM`,
 `5 AM`, `YESTERDAY 11 PM`) in mono. Each line: source kicker in mono
 `--muted`, then the item title in sans 14.5px linked to the item. The
@@ -537,7 +551,11 @@ Each unit is testable without network or model.
 - Name: **NTVstreams**. Repo `~/Dev/ntv`.
 - Design: PHYLO editorial subsystem, tokens copied verbatim.
 - Platforms: open APIs only (Bluesky, Reddit, YouTube). X deferred.
-- Curation: cluster, rank, rewrite; two desks; Culture & Sports is the main
+- Regional desks (2026-10-11): Choctaw (CNO first, via the WordPress REST
+  API because it has no feed) and Pacific Northwest Tribes (tribal and
+  regional feeds plus a Google News wide net). They take priority over the
+  topic desks.
+- Curation: cluster, rank, rewrite; four desks; Culture & Sports is the main
   column and gets four fifths of the page, News is a fixed side strip of one
   fifth, never mixed into the culture ranking. (Swapped from the original
   split on 2026-10-11.)

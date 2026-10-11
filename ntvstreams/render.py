@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -20,6 +20,8 @@ TEMPLATES = Path(__file__).parent / "templates"
 STATIC = Path(__file__).parent / "static"
 CULTURE_SHOWN = 32  # main column; the cap is higher, the rest stay in the River
 NEWS_SHOWN = 8      # side column; never padded
+CHOCTAW_SHOWN = 8   # side column; never padded
+PNW_SHOWN = 12      # side column; never padded
 RIVER_ON_INDEX = 60
 STALE_AFTER = 24
 
@@ -47,6 +49,8 @@ class PageData:
     site_url: str = ""
     timezone: str = "America/Los_Angeles"
     contact_email: str = ""
+    choctaw: list[StoryView] = field(default_factory=list)
+    pnw: list[StoryView] = field(default_factory=list)
 
 
 # ── filters ────────────────────────────────────────────────────────────────
@@ -133,10 +137,12 @@ def build_page_data(store: Store, sources: list[Source], config: Config, now: da
     stories = store.active_stories()
     news = _views(store, [s for s in stories if s.desk == "news"], sources_by_id)[:NEWS_SHOWN]
     culture = _views(store, [s for s in stories if s.desk == "culture"], sources_by_id)[:CULTURE_SHOWN]
+    choctaw = _views(store, [s for s in stories if s.desk == "choctaw"], sources_by_id)[:CHOCTAW_SHOWN]
+    pnw = _views(store, [s for s in stories if s.desk == "pnw"], sources_by_id)[:PNW_SHOWN]
     river = store.items_in_window(now, config.window_hours)
     states = {s.id: store.get_source_state(s.id) for s in sources}
     return PageData(updated_at=now, news=news, culture=culture, river=river, sources_by_id=sources_by_id,
-                    states=states, site_url=config.site_url, timezone=config.timezone)
+                    states=states, site_url=config.site_url, timezone=config.timezone, choctaw=choctaw, pnw=pnw)
 
 
 # ── rendering ──────────────────────────────────────────────────────────────

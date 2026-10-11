@@ -23,6 +23,9 @@ from .store import Store
 
 NEWS_MAX = 8
 CULTURE_MAX = 48
+CHOCTAW_MAX = 8
+PNW_MAX = 12
+DESK_CAPS = {"news": NEWS_MAX, "culture": CULTURE_MAX, "choctaw": CHOCTAW_MAX, "pnw": PNW_MAX}
 HEADLINE_MAX = 110
 EXCERPT_MAX = 300
 MAX_OUTPUT_TOKENS = 64000
@@ -31,7 +34,7 @@ MAX_OUTPUT_TOKENS = 64000
 class StoryOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str | None
-    desk: Literal["news", "culture"]
+    desk: Literal["news", "culture", "choctaw", "pnw"]
     headline: str
     lead_item_id: str
     coverage_item_ids: list[str]
@@ -52,10 +55,13 @@ What we do, in priority order.
 
 1. Group. Items that cover the same event are one story. A tribal paper, a wire story, and three Bluesky posts about one court ruling are one story. If two existing stories turn out to be the same event, merge them and keep the older id.
 
-2. Desk. Every story is on one desk.
+2. Desk. Every story is on one desk. Check the regional desks first, then the topic desks.
+   choctaw: stories primarily about the Choctaw Nation of Oklahoma (CNO), the Mississippi Band of Choctaw Indians, the Jena Band of Choctaw Indians, or Choctaw people and institutions, whatever the topic. Tribal government, the Choctaw Cultural Center, Choctaw athletes and artists, and Choctaw language all belong here.
+   pnw: stories primarily about the tribes of the Pacific Northwest: Washington, Oregon, Idaho, and the Salish Sea. Examples are Tulalip, Muckleshoot, Suquamish, Puyallup, Nisqually, Squaxin Island, Lummi, Swinomish, Snoqualmie, Yakama, Colville, Spokane, Umatilla, Warm Springs, Cowlitz, Makah, Quinault, and Coeur d'Alene. Treaty fisheries, salmon, and shared regional issues belong here when the story is about those tribes.
+   A story merely mentioning a Choctaw or Northwest person in passing is not a regional story. Put it on a topic desk.
    news: sovereignty, land, water, treaty and federal policy, courts, elections, health, education, language, economy, environment.
    culture: film, TV, music, fashion, awards, sports, athletes, actors, musicians, influencers, creators, and powwows as events.
-   When a story is both, it goes where its consequence is.
+   When a story is both news and culture, it goes where its consequence is. When a story fits both regional desks, choose the one it is mostly about.
 
 3. Lead. Prefer tier 1 Native press, then the original reporter over an aggregator, then the most complete account. A social post leads only when it is itself the news. The lead is the item whose headline and link anchor the story.
 
@@ -67,7 +73,7 @@ What we do, in priority order.
 
 7. Every item we were given and did not place goes in unplaced_item_ids. We never drop one.
 
-Limits the page enforces: at most {NEWS_MAX} news stories and {CULTURE_MAX} culture stories; ranks unique within a desk; every item id in at most one story; the lead is not repeated in coverage or discussion; coverage holds articles and videos, discussion holds social posts.
+Limits the page enforces: at most {NEWS_MAX} news stories, {CULTURE_MAX} culture stories, {CHOCTAW_MAX} choctaw stories, and {PNW_MAX} pnw stories; ranks unique within a desk; every item id in at most one story; the lead is not repeated in coverage or discussion; coverage holds articles and videos, discussion holds social posts.
 
 Items are given with their source, tier (1 Native press, 2 institutional, 3 wide net, 4 social), desk_hint (a hint, not a rule), kind, title, excerpt, time, and engagement. An item marked discussion_of links to another item id; it belongs in that item's story as discussion.
 
@@ -186,12 +192,11 @@ def validate_page(page: PageOut, known_item_ids: set[str], existing_story_ids: s
     errors: list[str] = []
     seen_items: Counter[str] = Counter()
     seen_story_ids: Counter[str] = Counter()
-    ranks: dict[str, Counter[int]] = {"news": Counter(), "culture": Counter()}
+    ranks: dict[str, Counter[int]] = {desk: Counter() for desk in DESK_CAPS}
     desks = Counter(s.desk for s in page.stories)
-    if desks["news"] > NEWS_MAX:
-        errors.append(f"news desk has {desks['news']} stories; the limit is {NEWS_MAX}")
-    if desks["culture"] > CULTURE_MAX:
-        errors.append(f"culture desk has {desks['culture']} stories; the limit is {CULTURE_MAX}")
+    for desk, cap in DESK_CAPS.items():
+        if desks[desk] > cap:
+            errors.append(f"{desk} desk has {desks[desk]} stories; the limit is {cap}")
     for s in page.stories:
         label = s.id or f"new story ranked {s.rank} on {s.desk}"
         if s.id is not None:

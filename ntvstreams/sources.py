@@ -8,8 +8,8 @@ from typing import Literal
 import yaml
 from pydantic import BaseModel, model_validator
 
-Kind = Literal["rss", "bluesky", "reddit", "youtube"]
-Desk = Literal["news", "culture", "any"]
+Kind = Literal["rss", "bluesky", "reddit", "youtube", "wordpress"]
+Desk = Literal["news", "culture", "choctaw", "pnw", "any"]
 
 
 class Source(BaseModel):
@@ -29,6 +29,8 @@ class Source(BaseModel):
     def _check_kind_fields(self) -> "Source":
         if self.kind == "rss" and not self.url:
             raise ValueError("rss source needs url")
+        if self.kind == "wordpress" and not self.url:
+            raise ValueError("wordpress source needs url (the REST collection, e.g. https://site/wp-json/wp/v2/posts)")
         if self.kind == "bluesky" and bool(self.query) == bool(self.actor):
             raise ValueError("bluesky source needs exactly one of query or actor")
         if self.kind == "reddit" and not self.subreddit:
