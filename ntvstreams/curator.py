@@ -25,6 +25,7 @@ NEWS_MAX = 32
 CULTURE_MAX = 8
 HEADLINE_MAX = 110
 EXCERPT_MAX = 300
+MAX_OUTPUT_TOKENS = 64000
 
 
 class StoryOut(BaseModel):
@@ -97,9 +98,11 @@ class AnthropicCurator:
 
     def complete(self, system: str, user: str) -> CuratorResponse:
         try:
-            response = self.client.beta.messages.create(
+            # The page is returned whole, including every unplaced item id, so a backlog run can be long.
+            # Stream so a large max_tokens never trips the SDK's non-streaming timeout guard.
+            with self.client.beta.messages.stream(
                 model=self.model,
-                max_tokens=16000,
+                max_tokens=MAX_OUTPUT_TOKENS,
                 betas=["server-side-fallback-2026-07-01"],
                 fallbacks="default",
                 system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
@@ -108,7 +111,8 @@ class AnthropicCurator:
                     "effort": self.effort,
                     "format": {"type": "json_schema", "schema": PageOut.model_json_schema()},
                 },
-            )
+            ) as stream:
+                response = stream.get_final_message()
         except anthropic.RateLimitError as e:
             raise CuratorError(f"rate limited: {e}") from e
         except anthropic.APIStatusError as e:
@@ -119,6 +123,8 @@ class AnthropicCurator:
             raise CuratorError(f"{e.__class__.__name__}: {e}") from e
         if response.stop_reason == "refusal":
             raise CuratorError("refusal")
+        if response.stop_reason == "max_tokens":
+            raise CuratorError(f"output truncated at {MAX_OUTPUT_TOKENS} tokens")
         text = next((b.text for b in response.content if b.type == "text"), "")
         usage = response.usage
         return CuratorResponse(

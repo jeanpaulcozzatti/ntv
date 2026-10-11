@@ -213,7 +213,7 @@ def test_anthropic_curator_wraps_any_sdk_exception():
     from ntvstreams.curator import AnthropicCurator
 
     class Msgs:
-        def create(self, **kw):
+        def stream(self, **kw):
             raise TypeError("Could not resolve authentication method")
 
     class Beta:
@@ -226,6 +226,52 @@ def test_anthropic_curator_wraps_any_sdk_exception():
     with pytest.raises(CuratorError) as exc:
         cur.complete("sys", "user")
     assert "authentication" in str(exc.value)
+
+
+def _stream_client(stop_reason: str, text: str = '{"stories": [], "unplaced_item_ids": []}'):
+    from types import SimpleNamespace
+
+    final = SimpleNamespace(
+        stop_reason=stop_reason,
+        content=[SimpleNamespace(type="text", text=text)],
+        usage=SimpleNamespace(input_tokens=10, output_tokens=5, cache_read_input_tokens=3),
+    )
+
+    class Stream:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def get_final_message(self):
+            return final
+
+    class Msgs:
+        def stream(self, **kw):
+            self.kw = kw
+            return Stream()
+
+    msgs = Msgs()
+    return SimpleNamespace(beta=SimpleNamespace(messages=msgs)), msgs
+
+
+def test_anthropic_curator_streams_with_large_output_budget():
+    from ntvstreams.curator import MAX_OUTPUT_TOKENS, AnthropicCurator
+
+    client, msgs = _stream_client("end_turn")
+    resp = AnthropicCurator("claude-opus-5-5", "medium", client=client).complete("sys", "user")
+    assert msgs.kw["max_tokens"] == MAX_OUTPUT_TOKENS >= 64000
+    assert (resp.input_tokens, resp.output_tokens, resp.cache_read_tokens) == (10, 5, 3)
+
+
+def test_anthropic_curator_reports_truncation_not_bad_json():
+    from ntvstreams.curator import AnthropicCurator
+
+    client, _ = _stream_client("max_tokens", text='{"stories": [{"id": nu')
+    with pytest.raises(CuratorError) as exc:
+        AnthropicCurator("claude-opus-5-5", "medium", client=client).complete("sys", "user")
+    assert "truncated" in str(exc.value)
 
 
 def test_unplaced_articles_are_reoffered_next_run(seeded):
