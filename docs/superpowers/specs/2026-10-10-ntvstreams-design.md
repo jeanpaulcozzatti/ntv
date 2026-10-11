@@ -115,8 +115,8 @@ Fetchers per kind:
 
 Every URL below is **unverified** at spec time. Task 1 of the
 implementation plan fetches each one, drops dead feeds, and finds
-replacements. The desk mix must leave the Culture desk with enough supply
-to fill eight stories on a normal day.
+replacements. The desk mix must leave the Culture & Sports desk, the main
+column, with enough supply to fill twelve stories on a normal day.
 
 **Tier 1, Native-run press (desk_hint news unless noted)**
 ICT (ictnews.org), Native News Online, Indianz.com, Tribal Business News,
@@ -303,8 +303,8 @@ In priority order:
 
 ### 7.3 Hard limits (enforced in code, not trusted to the model)
 
-- News desk: at most 32 stories; 12 shown on the front page.
-- Culture desk: at most 8 stories; all shown. Never padded.
+- Culture & Sports desk: at most 32 stories; 12 shown on the front page.
+- News desk: at most 8 stories; all shown. Never padded.
 - Every `lead_item_id`, coverage id, and discussion id must exist in the
   database and belong to at most one story.
 - Headline length over 110 characters, a story with no lead, or an
@@ -353,7 +353,7 @@ no exclamation marks, italic-in-brand as the only emphasis device.
 ### 8.2 Layout
 
 Max width 1200px, 24px gutters. Two columns, 62 / 38, 48px gap. Under
-760px: one column, main first, then culture, then river. No JavaScript.
+760px: one column, main first, then news, then river. No JavaScript.
 
 **Masthead.** 2px ink rule above, 1px below, 18px / 16px padding.
 Left: `NTVstreams` in Newsreader 500 at 22px, letter-spacing -0.014em.
@@ -361,7 +361,7 @@ Right: mono kicker `UPDATED 06:40 PT` then sans nav at 13.5px / 500:
 Front Page · River · Sources · About. Current page in `--brand` with a
 1px underline.
 
-**News desk (main column).** Section kicker `NEWS` in mono caps,
+**Culture & Sports desk (main column).** Section kicker `CULTURE & SPORTS` in mono caps,
 `--ls-mono`, `--muted`, under a 2px ink rule. Then up to 12 story blocks:
 
 - Kicker line, mono 10.5px caps: lead source name in `--brand`, author if
@@ -375,12 +375,12 @@ Front Page · River · Sources · About. Current page in `--brand` with a
   `r/Sub`, YouTube as channel name, each a link. Omitted when empty.
 - 1px `--rule-soft` below, 24px padding.
 
-**Culture & Sports (right column, top).** Kicker `CULTURE & SPORTS` under
+**News (right column, top).** Kicker `NEWS` under
 a 2px ink rule. Up to 8 compact blocks: same kicker line; headline at 19px
 Newsreader; one combined `More:` line that includes discussion; 16px
 padding; hairline below.
 
-**River (right column, below culture).** Kicker `RIVER`. Every item from
+**River (right column, below news).** Kicker `RIVER`. Every item from
 the last 48 hours, newest first, grouped under hour markers (`6 AM`,
 `5 AM`, `YESTERDAY 11 PM`) in mono. Each line: source kicker in mono
 `--muted`, then the item title in sans 14.5px linked to the item. The
@@ -506,7 +506,7 @@ Each unit is testable without network or model.
 - **Store.** Temp-file SQLite: insert, dedupe on re-insert, prune by age,
   items-since query, atomic story replacement.
 - **Curator.** Fake client with canned `PageOut` responses. Assert: the
-  culture cap of 8 and news cap of 32 are enforced, an item the model
+  culture cap of 32 and news cap of 8 are enforced, an item the model
   omits lands in the river, a story with no lead rejects the response
   and the previous page is kept, a once-invalid response is retried with
   errors appended, tokens land in `runs`. One opt-in live test runs the
@@ -537,8 +537,10 @@ Each unit is testable without network or model.
 - Name: **NTVstreams**. Repo `~/Dev/ntv`.
 - Design: PHYLO editorial subsystem, tokens copied verbatim.
 - Platforms: open APIs only (Bluesky, Reddit, YouTube). X deferred.
-- Curation: cluster, rank, rewrite; two desks; culture gets one fifth of
-  the page as a fixed strip, never mixed into the news ranking.
+- Curation: cluster, rank, rewrite; two desks; Culture & Sports is the main
+  column and gets four fifths of the page, News is a fixed side strip of one
+  fifth, never mixed into the culture ranking. (Swapped from the original
+  split on 2026-10-11.)
 - Model: Claude Opus 5.5, effort medium, structured output, fallbacks on.
 - Host: JP's laptop first; Mac mini when awake; public later.
 - Cross-border (First Nations / APTN) coverage: source present but off

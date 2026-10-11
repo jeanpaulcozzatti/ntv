@@ -21,8 +21,8 @@ from .models import Item, Story, StoryMember
 from .sources import Source
 from .store import Store
 
-NEWS_MAX = 32
-CULTURE_MAX = 8
+NEWS_MAX = 8
+CULTURE_MAX = 32
 HEADLINE_MAX = 110
 EXCERPT_MAX = 300
 MAX_OUTPUT_TOKENS = 64000

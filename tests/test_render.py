@@ -37,8 +37,8 @@ def _story_view(n: int, desk: str, rank: int, with_discussion: bool = True) -> S
 
 @pytest.fixture
 def page_data() -> PageData:
-    news = [_story_view(n, "news", n, with_discussion=(n != 4)) for n in range(1, 5)]
-    culture = [_story_view(n + 10, "culture", n) for n in range(1, 3)]
+    culture = [_story_view(n, "culture", n, with_discussion=(n != 4)) for n in range(1, 5)]
+    news = [_story_view(n + 10, "news", n) for n in range(1, 3)]
     river = [make_item(f"riv{n:013d}", source_id=["ict", "bsky", "reddit", "yt"][n % 4], kind=["article", "post", "post", "video"][n % 4],
                        title=f"River item {n}" + (" <b>bold</b>" if n == 0 else ""), published_at=NOW.replace(minute=0) - __import__("datetime").timedelta(minutes=37 * n),
                        raw={"handle": "h.bsky.social", "subreddit": "IndianCountry"}) for n in range(70)]
@@ -71,17 +71,19 @@ def test_index_structure(rendered):
     assert main.count('<article class="story') == 4 and main.count("story--top") == 1
     assert aside.count('<article class="story') == 2
     assert "NTVstreams" in html and "UPDATED 06:40 PT" in html
-    assert html.index("Headline news 1") < html.index("Headline news 2") < html.index("Headline news 4")
-    assert html.index("Headline culture 11") < html.index("Headline culture 12")
+    assert html.index("Headline culture 1") < html.index("Headline culture 2") < html.index("Headline culture 4")
+    assert html.index("Headline news 11") < html.index("Headline news 12")
+    assert "Culture &amp; Sports" in main and "News" not in _text(main).replace("Navajo", "")
+    assert "News" in aside and "Culture" not in aside
     assert 'class="current"' in html and ">Front Page<" in html
 
 
 def test_more_and_discussion_lines(rendered):
     html = rendered["index.html"]
-    story1 = html[html.index("Headline news 1"):html.index("Headline news 2")]
+    story1 = html[html.index("Headline culture 1"):html.index("Headline culture 2")]
     assert "More:" in story1 and "Navajo Times" in story1
     assert "Discussion:" in story1 and "@someone.bsky.social" in story1 and "r/IndianCountry" in story1
-    story4 = html[html.index("Headline news 4"):html.index("<aside")]
+    story4 = html[html.index("Headline culture 4"):html.index("<aside")]
     assert "Discussion:" not in story4
     assert "ICT" in story1 and "A. Reporter" in story1
 
@@ -138,7 +140,7 @@ def test_feed_xml_valid(rendered, page_data):
     items = root.findall("./channel/item")
     assert len(items) == 6
     assert {i.findtext("guid") for i in items} == {sv.story.id for sv in page_data.news + page_data.culture}
-    assert items[0].findtext("link") == page_data.news[0].lead.url
+    assert items[0].findtext("link") == page_data.culture[0].lead.url
     assert "Navajo Times" in items[0].findtext("description")
 
 
@@ -157,4 +159,4 @@ def test_empty_desks_show_placeholder(page_data, tmp_path):
     html = (tmp_path / "index.html").read_text()
     main = html[html.index("<main"):html.index("</main>")]
     assert "No stories yet" in main and "River" in main
-    assert "Culture" not in html[html.index("<aside"):html.index("</aside>")]
+    assert "News" not in html[html.index("<aside"):html.index("</aside>")]

@@ -3,18 +3,18 @@
 {% block body %}
 <div class="grid">
 <main class="col-main">
-  <section class="desk desk--news">
-    <h2 class="kicker desk-head">News</h2>
-    {% for sv in data.news %}{{ s.story(sv, top=loop.first) }}{% else %}
+  <section class="desk desk--culture">
+    <h2 class="kicker desk-head">Culture &amp; Sports</h2>
+    {% for sv in data.culture %}{{ s.story(sv, top=loop.first) }}{% else %}
     <p class="more">No stories yet. The editor has not run since the last fetch; everything collected is in the River.</p>
     {% endfor %}
   </section>
 </main>
 <aside class="col-side">
-  {% if data.culture %}
-  <section class="desk desk--culture">
-    <h2 class="kicker desk-head">Culture &amp; Sports</h2>
-    {% for sv in data.culture %}{{ s.compact(sv) }}{% endfor %}
+  {% if data.news %}
+  <section class="desk desk--news">
+    <h2 class="kicker desk-head">News</h2>
+    {% for sv in data.news %}{{ s.compact(sv) }}{% endfor %}
   </section>
   {% endif %}
   {{ s.river(river) }}

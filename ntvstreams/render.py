@@ -18,7 +18,8 @@ from .store import Store
 
 TEMPLATES = Path(__file__).parent / "templates"
 STATIC = Path(__file__).parent / "static"
-NEWS_SHOWN = 12
+CULTURE_SHOWN = 12  # main column; the cap is higher, the rest stay in the River and the feed order below the fold
+NEWS_SHOWN = 8      # side column; never padded
 RIVER_ON_INDEX = 60
 STALE_AFTER = 24
 
@@ -131,7 +132,7 @@ def build_page_data(store: Store, sources: list[Source], config: Config, now: da
     sources_by_id = {s.id: s for s in sources}
     stories = store.active_stories()
     news = _views(store, [s for s in stories if s.desk == "news"], sources_by_id)[:NEWS_SHOWN]
-    culture = _views(store, [s for s in stories if s.desk == "culture"], sources_by_id)
+    culture = _views(store, [s for s in stories if s.desk == "culture"], sources_by_id)[:CULTURE_SHOWN]
     river = store.items_in_window(now, config.window_hours)
     states = {s.id: store.get_source_state(s.id) for s in sources}
     return PageData(updated_at=now, news=news, culture=culture, river=river, sources_by_id=sources_by_id,
