@@ -1,0 +1,29 @@
+# Temporary: print the OIDC claims and the raw token-exchange response to debug WIF. Delete after use.
+name: wif-debug
+on: workflow_dispatch
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exchange and show result
+        env:
+          RULE: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          ORG: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          SA: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+          WS: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+        run: |
+          JWT=$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" | jq -r .value)
+          echo "--- claims (payload only) ---"
+          cut -d. -f2 <<< "$JWT" | tr '_-' '/+' | base64 -d 2>/dev/null | jq '{iss, sub, aud, ref, event_name, repository, repository_owner, repository_owner_id, jti_present: (.jti != null)}'
+          echo "--- ids in use ---"
+          echo "rule=$RULE org=$ORG sa=$SA ws=$WS"
+          echo "--- exchange response ---"
+          curl -sS -w '\nHTTP %{http_code}\n' https://api.anthropic.com/v1/oauth/token \
+            -H "content-type: application/json" \
+            --data "$(jq -n --arg a "$JWT" --arg r "$RULE" --arg o "$ORG" --arg s "$SA" --arg w "$WS" \
+              '{grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer", assertion:$a, federation_rule_id:$r, organization_id:$o, service_account_id:$s, workspace_id:$w}')" \
+            | sed -E 's/("access_token":")[^"]+/\1<redacted>/'
