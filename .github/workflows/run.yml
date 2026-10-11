@@ -1,0 +1,97 @@
+# Hourly NTVstreams run on GitHub Actions. No stored secrets anywhere:
+#   - Claude: Workload Identity Federation. GitHub's OIDC token for this job is
+#     exchanged by the anthropic SDK for a short-lived token acting as an Anthropic
+#     service account. The four ANTHROPIC_* IDs below are non-secret repository
+#     variables (Settings -> Secrets and variables -> Actions -> Variables).
+#   - Pages: deployed with the same job-level OIDC permission.
+# State (data/ntv.db) rides along in the Actions cache between runs; the 48-hour
+# window means a lost cache only costs curated history, never correctness.
+name: run
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # :17 past the hour; top-of-hour is GitHub's busiest minute
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # GitHub OIDC token, used for both Anthropic WIF and Pages deploy
+  contents: read
+  pages: write
+
+concurrency:
+  group: ntv-run
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    env:
+      ANTHROPIC_FEDERATION_RULE_ID: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+      ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+      ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Restore pipeline state
+        uses: actions/cache/restore@v6
+        with:
+          path: data/ntv.db
+          key: ntv-db-${{ github.run_id }}
+          restore-keys: ntv-db-
+
+      - name: Fetch GitHub OIDC token for Anthropic
+        # The SDK re-reads this file on every exchange; a run is far shorter than
+        # the 600 s token lifetime, so one fetch per job is enough.
+        run: |
+          curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" \
+            | jq -r .value > "$ANTHROPIC_IDENTITY_TOKEN_FILE"
+          test -s "$ANTHROPIC_IDENTITY_TOKEN_FILE"
+
+      - name: Run pipeline
+        id: run
+        # `ntv run` exits 1 when any source errored but still renders and publishes;
+        # a flaky feed must not block the deploy, so keep going and report below.
+        continue-on-error: true
+        run: |
+          uv sync --frozen
+          uv run ntv run
+
+      - name: Save pipeline state
+        if: always() && hashFiles('data/ntv.db') != ''
+        uses: actions/cache/save@v6
+        with:
+          path: data/ntv.db
+          key: ntv-db-${{ github.run_id }}
+
+      - name: Report
+        if: always()
+        run: |
+          echo "## NTVstreams run" >> "$GITHUB_STEP_SUMMARY"
+          echo "pipeline exit: ${{ steps.run.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f out/status.json ]; then
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat out/status.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Check rendered site
+        id: site
+        run: test -f out/index.html
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+      - id: deploy
+        uses: actions/deploy-pages@v5

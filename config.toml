@@ -5,7 +5,7 @@ window_hours = 48
 monthly_input_token_ceiling = 5000000
 data_dir = "data"
 out_dir = "out"
-site_url = ""
+site_url = "https://jeanpaulcozzatti.github.io/ntv/"
 timezone = "America/Los_Angeles"
 
 [publish]

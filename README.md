@@ -12,7 +12,7 @@ into stories with a plain headline, and renders a static site in the PHYLO edito
 ```bash
 uv sync
 uv run ntv check-sources        # fetch every source once, report items and errors
-export ANTHROPIC_API_KEY=...     # or put it in ~/.config/ntvstreams/env (see below)
+export ANTHROPIC_API_KEY=...     # local only; production uses Workload Identity Federation (below)
 uv run ntv run                   # fetch, curate, render, publish
 open out/index.html
 ```
@@ -23,7 +23,27 @@ State lives in `data/ntv.db` (SQLite); the site is written to `out/`. Both are g
 Without an API key the run still completes: fetch, render, and publish happen, the
 curator logs an error, and the page shows the River with whatever stories it last had.
 
-## Hourly on this Mac (launchd)
+## Hourly on GitHub Actions (production)
+
+`.github/workflows/run.yml` runs the pipeline at 17 past every hour and deploys `out/` to
+GitHub Pages at <https://jeanpaulcozzatti.github.io/ntv/>. There are no stored secrets:
+
+- **Claude** is called through [Workload Identity Federation](https://platform.claude.com/docs/en/manage-claude/workload-identity-federation).
+  The job's GitHub OIDC token is exchanged by the `anthropic` SDK for a short-lived token
+  that acts as an Anthropic service account. The federation rule in the Claude Console is
+  pinned to `repo:jeanpaulcozzatti/ntv:ref:refs/heads/main`, so only workflows on `main`
+  can authenticate. The four IDs the SDK needs are non-secret repository variables:
+  `ANTHROPIC_FEDERATION_RULE_ID`, `ANTHROPIC_ORGANIZATION_ID`, `ANTHROPIC_SERVICE_ACCOUNT_ID`,
+  `ANTHROPIC_WORKSPACE_ID`.
+- **Pages** deploys with the same `id-token: write` permission.
+- **State** (`data/ntv.db`) is carried between runs in the Actions cache. If the cache is
+  ever evicted the next run starts from an empty database; the 48-hour window refills it.
+
+Run it by hand with `gh workflow run run.yml`; each run's `status.json` is in the job
+summary. A denied token exchange shows up in the Console under
+Settings → Workload identity → History.
+
+## Hourly on a Mac (launchd, local development)
 
 ```bash
 mkdir -p ~/.config/ntvstreams && chmod 700 ~/.config/ntvstreams

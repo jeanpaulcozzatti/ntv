@@ -418,6 +418,17 @@ the Sources page." Links: Sources · About · RSS.
   `EnvironmentVariables` or read from `~/.config/ntvstreams/env`. Never
   in the repo. Bluesky, Reddit, YouTube need no credentials.
 
+**Addendum (2026-10-11).** Production moved off the laptop to a scheduled
+GitHub Actions workflow (`.github/workflows/run.yml`, hourly) that
+authenticates to Claude with Workload Identity Federation instead of an
+API key: the job's GitHub OIDC token is exchanged for a short-lived token
+acting as an Anthropic service account, with the federation rule pinned
+to `repo:jeanpaulcozzatti/ntv:ref:refs/heads/main`. `data/ntv.db` is
+carried between runs in the Actions cache; `out/` deploys to GitHub Pages
+(`https://jeanpaulcozzatti.github.io/ntv/`). launchd remains the local
+development runner. Phase 3 (S3 + CloudFront) can replace Pages without
+changing the pipeline.
+
 ### 9.2 Publish backends
 
 | backend | config | phase |
