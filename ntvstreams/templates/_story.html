@@ -3,12 +3,12 @@
 {% endmacro %}
 {% macro coverage_line(sv, label) %}
 {% if sv.coverage %}
-<p class="more"><span class="label">{{ label }}</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ source_label(item, src) }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+<p class="more"><span class="label">{{ label }}</span> {% for url, name in link_labels(sv.coverage) %}<a href="{{ url }}">{{ name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
 {% endif %}
 {% endmacro %}
 {% macro discussion_line(sv, label) %}
 {% if sv.discussion %}
-<p class="more"><span class="label">{{ label }}</span> {% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+<p class="more"><span class="label">{{ label }}</span> {% for url, name in link_labels(sv.discussion) %}<a href="{{ url }}">{{ name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
 {% endif %}
 {% endmacro %}
 {% macro story(sv, top=false) %}
@@ -24,7 +24,7 @@
   {{ kicker(sv) }}
   <h3><a href="{{ sv.lead.url }}">{{ sv.story.headline }}</a></h3>
   {% if sv.coverage or sv.discussion %}
-  <p class="more"><span class="label">More:</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ source_label(item, src) }}</a>{% if not loop.last or sv.discussion %}, {% endif %}{% endfor %}{% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+  <p class="more"><span class="label">More:</span> {% for url, name in link_labels(sv.coverage, sv.discussion) %}<a href="{{ url }}">{{ name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
   {% endif %}
 </article>
 {% endmacro %}

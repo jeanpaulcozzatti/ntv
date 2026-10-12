@@ -45,6 +45,9 @@ def entry_to_item(entry, source: Source, now: datetime, resolve=None) -> Item | 
         outlet = (entry.get("source") or {}).get("title") or source.name
         if title.endswith(f" - {outlet}"):
             title = title[: -len(outlet) - 3].rstrip()
+    raw = {k: entry.get(k) for k in ("link", "title", "author", "summary", "published") if entry.get(k)}
+    if gnews:
+        raw["outlet"] = outlet  # the real publisher; the page shows this instead of "Google News"
     return Item(
         id=item_id(canonical),
         source_id=source.id,
@@ -56,7 +59,7 @@ def entry_to_item(entry, source: Source, now: datetime, resolve=None) -> Item | 
         excerpt=None if gnews else make_excerpt(_entry_body(entry)),
         published_at=ensure_utc(_entry_datetime(entry), now),
         fetched_at=now,
-        raw={k: entry.get(k) for k in ("link", "title", "author", "summary", "published") if entry.get(k)},
+        raw=raw,
     )
 
 

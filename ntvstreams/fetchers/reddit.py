@@ -49,7 +49,7 @@ def entry_to_items(entry, source: Source, now: datetime, resolve=None) -> tuple[
         article = Item(
             id=item_id(a_canon), source_id=source.id, url=target, canonical_url=a_canon, kind="article",
             title=title, author=None, excerpt=None, published_at=published, fetched_at=now,
-            raw={"via": url},
+            raw={"via": url, "via_subreddit": _subreddit(entry)},
         )
         items.append(article)
         links.append((post.id, article.id))

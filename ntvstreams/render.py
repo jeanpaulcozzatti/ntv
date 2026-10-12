@@ -79,17 +79,37 @@ def hour_group(dt: datetime, now: datetime, tz: ZoneInfo) -> str:
     return f"{local.strftime('%b %-d').upper()} {label}"
 
 
+def short_handle(handle: str) -> str:
+    """The part of a handle that identifies the account: fox2detroit.bsky.social -> fox2detroit, nytimes.com -> nytimes."""
+    handle = handle.strip().lstrip("@").lower()
+    if handle.endswith(".bsky.social"):
+        return handle[: -len(".bsky.social")]
+    labels = handle.removeprefix("www.").split(".")
+    return ".".join(labels[:-1]) if len(labels) > 1 else handle
+
+
+def _host(url: str) -> str | None:
+    host = (urlsplit(url).hostname or "").lower().removeprefix("www.")
+    return host or None
+
+
 def social_label(item: Item, source: Source) -> str:
+    raw = item.raw or {}
     if source.kind == "bluesky":
-        raw = item.raw or {}
         handle = raw.get("handle") or raw.get("via_handle")  # via_handle: who shared a link card
         if not handle:
             parts = urlsplit(item.url).path.split("/")
             handle = parts[2] if len(parts) > 2 and parts[1] == "profile" else None
-        return f"@{handle}" if handle else source.name
+        if handle:
+            return "@" + short_handle(handle)
+        return _host(item.url) or source.name
     if source.kind == "reddit":
-        sub = (item.raw.get("subreddit") if item.raw else None) or source.subreddit
-        return f"r/{sub}"
+        parts = urlsplit(item.url).path.split("/")
+        sub = parts[2] if len(parts) > 2 and parts[1].lower() == "r" else None
+        sub = sub or raw.get("subreddit") or raw.get("via_subreddit")
+        if sub and "+" not in sub:
+            return f"r/{sub}"
+        return _host(item.url) or source.name
     if source.kind == "youtube":
         return item.author or source.name
     return source.name
@@ -102,7 +122,24 @@ def source_label(item: Item, source: Source | None) -> str:
     """The name shown on a kicker or link: a social item shows who posted (@handle, r/sub, channel), not the network."""
     if source is None:
         return item.source_id
-    return social_label(item, source) if source.kind in SOCIAL_KINDS else source.name
+    if source.kind in SOCIAL_KINDS:
+        return social_label(item, source)
+    outlet = (item.raw or {}).get("outlet")  # Google News: the real publisher
+    return outlet or source.name
+
+
+def link_labels(*pair_lists) -> list[tuple[str, str]]:
+    """(url, label) for each linked item, one per distinct label: two posts by one account show the account once."""
+    seen: set[str] = set()
+    out: list[tuple[str, str]] = []
+    for pairs in pair_lists:
+        for item, src in pairs:
+            label = source_label(item, src)
+            if label.lower() in seen:
+                continue
+            seen.add(label.lower())
+            out.append((item.url, label))
+    return out
 
 
 def group_river(items: list[Item], now: datetime, tz: ZoneInfo) -> list[tuple[str, list[Item]]]:
@@ -164,6 +201,7 @@ def _env(data: PageData) -> Environment:
     env.filters["age"] = lambda dt: age(dt, data.updated_at, tz)
     env.filters["social_label"] = lambda pair: social_label(pair[0], pair[1])
     env.globals["source_label"] = lambda item, source: source_label(item, source)
+    env.globals["link_labels"] = link_labels
     env.globals["SOCIAL_KINDS"] = SOCIAL_KINDS
     env.filters["rfc822"] = lambda dt: dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
     env.globals["group_river"] = lambda items: group_river(items, data.updated_at, tz)

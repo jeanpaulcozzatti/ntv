@@ -86,7 +86,7 @@ def test_more_and_discussion_lines(rendered):
     html = rendered["index.html"]
     story1 = html[html.index("Headline culture 1"):html.index("Headline culture 2")]
     assert "More:" in story1 and "Navajo Times" in story1
-    assert "Discussion:" in story1 and "@someone.bsky.social" in story1 and "r/IndianCountry" in story1
+    assert "Discussion:" in story1 and "@someone<" in story1 and "bsky.social" not in _text(story1) and "r/IndianCountry" in story1
     story4 = html[html.index("Headline culture 4"):html.index("<aside")]
     assert "Discussion:" not in story4
     assert "ICT" in story1 and "A. Reporter" in story1
@@ -124,8 +124,9 @@ def test_river_hour_groups_in_pt_across_dst():
 
 
 def test_social_label():
-    assert social_label(make_item("a" * 16, raw={"handle": "x.bsky.social"}), SRC["bsky"]) == "@x.bsky.social"
-    assert social_label(make_item("b" * 16, url="https://bsky.app/profile/y.bsky.social/post/1"), SRC["bsky"]) == "@y.bsky.social"
+    assert social_label(make_item("a" * 16, raw={"handle": "x.bsky.social"}), SRC["bsky"]) == "@x"
+    assert social_label(make_item("b" * 16, url="https://bsky.app/profile/y.bsky.social/post/1"), SRC["bsky"]) == "@y"
+    assert social_label(make_item("b" * 16, raw={"handle": "fox2detroit.com"}), SRC["bsky"]) == "@fox2detroit"
     assert social_label(make_item("c" * 16, raw={"subreddit": "NativeAmerican"}), SRC["reddit"]) == "r/NativeAmerican"
     assert social_label(make_item("d" * 16, author="Native America Calling"), SRC["yt"]) == "Native America Calling"
     assert social_label(make_item("e" * 16), SRC["ict"]) == "ICT"
@@ -184,9 +185,9 @@ def test_social_items_show_who_posted_not_the_network(page_data, tmp_path):
     render_site(page_data, tmp_path)
     html = (tmp_path / "index.html").read_text()
     lead = html[html.index("A post leads this story") - 400:html.index("A post leads this story")]
-    assert ">@lead.bsky.social<" in lead and ">Bluesky<" not in lead and "Display Name" not in lead
+    assert ">@lead<" in lead and ">Bluesky<" not in lead and "Display Name" not in lead
     river = html[html.index('class="river"'):]
-    assert ">@h.bsky.social<" in river and ">r/IndianCountry<" in river
+    assert ">@h<" in river and "bsky.social" not in _text(river) and ">r/IndianCountry<" in river
     assert ">Bluesky<" not in river and ">Reddit<" not in river
     assert ">ICT<" in river  # a news outlet keeps its name
 
@@ -195,6 +196,46 @@ def test_link_card_article_shows_who_shared_it():
     from ntvstreams.render import source_label
 
     article = make_item("shared0000000001", source_id="bsky", kind="article", title="Court rules", raw={"via": "at://x", "via_handle": "ictnews.bsky.social"})
-    assert source_label(article, SRC["bsky"]) == "@ictnews.bsky.social"
-    legacy = make_item("shared0000000002", source_id="bsky", kind="article", title="Old item", raw={"via": "at://y"})
-    assert source_label(legacy, SRC["bsky"]) == "Bluesky"  # items stored before via_handle existed, until they age out
+    assert source_label(article, SRC["bsky"]) == "@ictnews"
+    legacy = make_item("shared0000000002", source_id="bsky", kind="article", title="Old item", url="https://www.ictnews.org/x", raw={"via": "at://y"})
+    assert source_label(legacy, SRC["bsky"]) == "ictnews.org"  # stored before via_handle existed: the outlet host, never "Bluesky"
+
+
+def test_short_handle():
+    from ntvstreams.render import short_handle
+
+    assert short_handle("fox2detroit.bsky.social") == "fox2detroit"
+    assert short_handle("@FOX9mn.bsky.social") == "fox9mn"
+    assert short_handle("nytimes.com") == "nytimes"
+    assert short_handle("bigearthdata.ai") == "bigearthdata"
+    assert short_handle("www.example.org") == "example"
+    assert short_handle("localname") == "localname"
+
+
+def test_reddit_label_comes_from_the_post_url_never_the_multireddit():
+    reddit_multi = Source(id="reddit", name="Reddit", kind="reddit", subreddit="IndianCountry+NativeAmerican+IndigenousPeoples", tier=4)
+    post = make_item("rdt0000000000001", source_id="reddit", kind="post", url="https://www.reddit.com/r/NativeAmerican/comments/abc/title/")
+    assert social_label(post, reddit_multi) == "r/NativeAmerican"
+    bare = make_item("rdt0000000000002", source_id="reddit", kind="article", url="https://example.org/story", raw={"via": "u"})
+    assert social_label(bare, reddit_multi) == "example.org"  # no subreddit known and the multireddit is not a name
+    shared = make_item("rdt0000000000003", source_id="reddit", kind="article", url="https://example.org/s2", raw={"via": "u", "via_subreddit": "IndianCountry"})
+    assert social_label(shared, reddit_multi) == "r/IndianCountry"
+
+
+def test_google_news_items_show_the_real_outlet():
+    from ntvstreams.render import source_label
+
+    gnews = Source(id="g", name="Google News", kind="rss", url="https://news.google.com/rss/search?q=x", tier=3)
+    assert source_label(make_item("g" * 16, source_id="g", raw={"outlet": "Navajo Times"}), gnews) == "Navajo Times"
+    assert source_label(make_item("h" * 16, source_id="g"), gnews) == "Google News"  # stored before outlet was recorded
+
+
+def test_link_labels_show_each_account_once():
+    from ntvstreams.render import link_labels
+
+    fox1 = make_item("fx00000000000001", source_id="bsky", kind="post", url="https://bsky.app/profile/fox2detroit.bsky.social/post/1", raw={"handle": "fox2detroit.bsky.social"})
+    fox2 = make_item("fx00000000000002", source_id="bsky", kind="post", url="https://bsky.app/profile/fox2detroit.bsky.social/post/2", raw={"handle": "fox2detroit.bsky.social"})
+    ict = make_item("ict0000000000001", source_id="ict", url="https://ictnews.org/a")
+    out = link_labels([(ict, SRC["ict"]), (fox1, SRC["bsky"])], [(fox2, SRC["bsky"])])
+    assert [name for _, name in out] == ["ICT", "@fox2detroit"]
+    assert out[1][0] == fox1.url  # the first link wins

@@ -86,3 +86,4 @@ def test_rss_google_news_strips_source_suffix(respx_mock, http):
     res = run(http, src=src)
     assert [i.title for i in res.items] == ["Council approves water settlement funding", "A title with - a dash in the middle"]
     assert res.items[0].excerpt is None  # Google News descriptions are just the link again
+    assert res.items[0].raw["outlet"] == "Navajo Times"
