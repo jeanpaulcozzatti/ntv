@@ -79,18 +79,29 @@ def hour_group(dt: datetime, now: datetime, tz: ZoneInfo) -> str:
     return f"{local.strftime('%b %-d').upper()} {label}"
 
 
+# Hosting suffixes that carry no identity. The account is whatever comes before them.
+PLATFORM_SUFFIXES = ("bsky.social", "latinsky.social", "blacksky.app", "bsky.team", "ap.brid.gy")
+# Bridged websites: the part before the suffix is the original domain (usluck.com.web.brid.gy -> usluck.com).
+BRIDGE_SUFFIXES = ("web.brid.gy",)
+
+
 def short_handle(handle: str) -> str:
     """The part of a handle that identifies the account: fox2detroit.bsky.social -> fox2detroit, nytimes.com -> nytimes."""
     handle = handle.strip().lstrip("@").lower()
-    if handle.endswith(".bsky.social"):
-        return handle[: -len(".bsky.social")]
+    for suffix in PLATFORM_SUFFIXES:
+        if handle.endswith("." + suffix):
+            return handle[: -len(suffix) - 1]
+    for suffix in BRIDGE_SUFFIXES:
+        if handle.endswith("." + suffix):
+            handle = handle[: -len(suffix) - 1]
+            break
     labels = handle.removeprefix("www.").split(".")
     return ".".join(labels[:-1]) if len(labels) > 1 else handle
 
 
 def _host(url: str) -> str | None:
     host = (urlsplit(url).hostname or "").lower().removeprefix("www.")
-    return host or None
+    return {"youtu.be": "youtube.com"}.get(host, host) or None
 
 
 def social_label(item: Item, source: Source) -> str:

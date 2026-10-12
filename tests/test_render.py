@@ -210,6 +210,14 @@ def test_short_handle():
     assert short_handle("bigearthdata.ai") == "bigearthdata"
     assert short_handle("www.example.org") == "example"
     assert short_handle("localname") == "localname"
+    assert short_handle("iustitia100.latinsky.social") == "iustitia100"
+    assert short_handle("someone.blacksky.app") == "someone"
+    assert short_handle("usluck.com.web.brid.gy") == "usluck"
+    assert short_handle("user.mastodon.social.ap.brid.gy") == "user.mastodon.social"
+
+    from ntvstreams.render import _host
+
+    assert _host("https://youtu.be/abc") == "youtube.com" and _host("https://www.ictnews.org/x") == "ictnews.org"
 
 
 def test_reddit_label_comes_from_the_post_url_never_the_multireddit():
