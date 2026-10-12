@@ -81,7 +81,8 @@ def hour_group(dt: datetime, now: datetime, tz: ZoneInfo) -> str:
 
 def social_label(item: Item, source: Source) -> str:
     if source.kind == "bluesky":
-        handle = item.raw.get("handle") if item.raw else None
+        raw = item.raw or {}
+        handle = raw.get("handle") or raw.get("via_handle")  # via_handle: who shared a link card
         if not handle:
             parts = urlsplit(item.url).path.split("/")
             handle = parts[2] if len(parts) > 2 and parts[1] == "profile" else None

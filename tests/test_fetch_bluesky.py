@@ -44,6 +44,7 @@ def test_search_posts_mapped(respx_mock, http):
     assert a.canonical_url == "https://ictnews.org/news/x" and a.title == "Court rules for tribe in water case"
     assert a.excerpt == "A federal judge sided with the tribe on Thursday." and a.published_at == p0.published_at
     assert res.links == [(p0.id, a.id)]
+    assert a.raw["via_handle"] == "ictnews.bsky.social"  # who shared the link, shown instead of "Bluesky"
     assert "\n" not in posts[2].title
 
 

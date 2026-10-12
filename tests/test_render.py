@@ -189,3 +189,12 @@ def test_social_items_show_who_posted_not_the_network(page_data, tmp_path):
     assert ">@h.bsky.social<" in river and ">r/IndianCountry<" in river
     assert ">Bluesky<" not in river and ">Reddit<" not in river
     assert ">ICT<" in river  # a news outlet keeps its name
+
+
+def test_link_card_article_shows_who_shared_it():
+    from ntvstreams.render import source_label
+
+    article = make_item("shared0000000001", source_id="bsky", kind="article", title="Court rules", raw={"via": "at://x", "via_handle": "ictnews.bsky.social"})
+    assert source_label(article, SRC["bsky"]) == "@ictnews.bsky.social"
+    legacy = make_item("shared0000000002", source_id="bsky", kind="article", title="Old item", raw={"via": "at://y"})
+    assert source_label(legacy, SRC["bsky"]) == "Bluesky"  # items stored before via_handle existed, until they age out

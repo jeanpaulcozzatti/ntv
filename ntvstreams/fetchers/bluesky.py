@@ -79,7 +79,7 @@ def post_to_items(post: dict, source: Source, now: datetime, resolve=None) -> tu
             excerpt=make_excerpt(ext.get("description")),
             published_at=published,
             fetched_at=now,
-            raw={"via": post.get("uri")},
+            raw={"via": post.get("uri"), "via_handle": author.get("handle")},
         )
         items.append(article)
         links.append((post_item.id, article.id))
