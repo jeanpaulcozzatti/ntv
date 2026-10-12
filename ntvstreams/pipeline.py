@@ -16,6 +16,7 @@ import httpx
 from .config import Config
 from .curator import CuratorClient, curate_stage
 from .fetchers import fail_state, get_fetcher
+from .fetchers.ytname import add_channel_handles
 from .models import Run
 from .publish import Publisher
 from .render import build_page_data, render_site
@@ -50,6 +51,7 @@ def fetch_stage(sources: list[Source], store: Store, http: httpx.Client, now: da
             # Feeds (Google News site: queries especially) serve items years old; keep only what retention would keep.
             cutoff = now - timedelta(days=ITEM_DAYS)
             fresh = [it for it in result.items if it.published_at >= cutoff and _safe_url(it.url) and _safe_url(it.canonical_url)]
+            fresh = add_channel_handles(fresh, source, store, http)
             kept = {it.id for it in fresh}
             summary.items_new += store.upsert_items(fresh)
             for post_id, article_id in result.links:

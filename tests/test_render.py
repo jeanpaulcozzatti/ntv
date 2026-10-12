@@ -247,3 +247,17 @@ def test_link_labels_show_each_account_once():
     out = link_labels([(ict, SRC["ict"]), (fox1, SRC["bsky"])], [(fox2, SRC["bsky"])])
     assert [name for _, name in out] == ["ICT", "@fox2detroit"]
     assert out[1][0] == fox1.url  # the first link wins
+
+
+def test_youtube_links_show_the_channel_handle():
+    from ntvstreams.render import source_label
+
+    shared = make_item("yt00000000000001", source_id="reddit", kind="article", url="https://youtu.be/AMmzpt1xmac",
+                       raw={"via": "u", "channel_handle": "NativeAmericanLoFi"})
+    assert source_label(shared, SRC["reddit"]) == "@NativeAmericanLoFi"
+    shared_on_bsky = make_item("yt00000000000002", source_id="bsky", kind="article", url="https://youtu.be/x",
+                               raw={"via": "at://x", "via_handle": "someone.bsky.social", "channel_handle": "PowWowsCom"})
+    assert source_label(shared_on_bsky, SRC["bsky"]) == "@PowWowsCom"  # the channel, not whoever shared it
+    own = make_item("yt00000000000003", source_id="yt", kind="video", author="ICT", raw={"channel_handle": "ictnews"})
+    assert source_label(own, SRC["yt"]) == "@ictnews"
+    assert source_label(make_item("yt00000000000004", source_id="yt", kind="video", author="ICT"), SRC["yt"]) == "ICT"  # no handle known yet

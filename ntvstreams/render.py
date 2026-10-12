@@ -106,6 +106,8 @@ def _host(url: str) -> str | None:
 
 def social_label(item: Item, source: Source) -> str:
     raw = item.raw or {}
+    if raw.get("channel_handle"):  # a YouTube link or video: the channel's @name, whoever shared it
+        return "@" + raw["channel_handle"]
     if source.kind == "bluesky":
         handle = raw.get("handle") or raw.get("via_handle")  # via_handle: who shared a link card
         if not handle:
@@ -133,7 +135,7 @@ def source_label(item: Item, source: Source | None) -> str:
     """The name shown on a kicker or link: a social item shows who posted (@handle, r/sub, channel), not the network."""
     if source is None:
         return item.source_id
-    if source.kind in SOCIAL_KINDS:
+    if source.kind in SOCIAL_KINDS or (item.raw or {}).get("channel_handle"):
         return social_label(item, source)
     outlet = (item.raw or {}).get("outlet")  # Google News: the real publisher
     return outlet or source.name
