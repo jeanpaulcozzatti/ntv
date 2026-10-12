@@ -61,7 +61,7 @@ def fetch_stage(sources: list[Source], store: Store, http: httpx.Client, now: da
             store.set_source_state(result.state)
         if result.error:
             summary.errors.append({"source_id": source.id, "message": result.error})
-    backfill_channel_handles(sources, store, http, now)
+    backfill_channel_handles(sources, store, http, now, hours=ITEM_DAYS * 24)  # stories keep items for the full retention
     return summary
 
 
