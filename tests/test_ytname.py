@@ -70,3 +70,20 @@ def test_enrich_is_bounded_and_failures_are_silent(respx_mock, http, store):
     assert sum(1 for i in out if i.raw.get("channel_handle")) == MAX_LOOKUPS
     respx_mock.get(OEMBED).mock(side_effect=httpx.ConnectError("down"))
     assert add_channel_handles([_yt_item(900)], REDDIT, store, http)[0].raw.get("channel_handle") is None
+
+
+def test_backfill_names_stored_items_and_is_idempotent(respx_mock, http, store):
+    from ntvstreams.fetchers.ytname import backfill_channel_handles
+    from tests.conftest import NOW
+
+    route = respx_mock.get(OEMBED).respond(200, json={"author_url": "https://www.youtube.com/@PowWowsCom"})
+    old = make_item("old0000000000001", source_id="yt-powwows", kind="video", url="https://www.youtube.com/watch?v=old1")
+    other = make_item("old0000000000002", source_id="yt-powwows", kind="video", url="https://www.youtube.com/watch?v=old2")
+    plain = make_item("old0000000000003", source_id="reddit", url="https://ictnews.org/a")
+    store.upsert_items([old, other, plain])
+    assert backfill_channel_handles([YT, REDDIT], store, http, NOW) == 2
+    assert route.call_count == 1  # one channel, one lookup
+    got = store.get_items([old.id, other.id, plain.id])
+    assert got[old.id].raw["channel_handle"] == "PowWowsCom" and got[other.id].raw["channel_handle"] == "PowWowsCom"
+    assert "channel_handle" not in got[plain.id].raw
+    assert backfill_channel_handles([YT, REDDIT], store, http, NOW) == 0 and route.call_count == 1

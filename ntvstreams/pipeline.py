@@ -16,7 +16,7 @@ import httpx
 from .config import Config
 from .curator import CuratorClient, curate_stage
 from .fetchers import fail_state, get_fetcher
-from .fetchers.ytname import add_channel_handles
+from .fetchers.ytname import add_channel_handles, backfill_channel_handles
 from .models import Run
 from .publish import Publisher
 from .render import build_page_data, render_site
@@ -61,6 +61,7 @@ def fetch_stage(sources: list[Source], store: Store, http: httpx.Client, now: da
             store.set_source_state(result.state)
         if result.error:
             summary.errors.append({"source_id": source.id, "message": result.error})
+    backfill_channel_handles(sources, store, http, now)
     return summary
 
 
