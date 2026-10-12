@@ -94,6 +94,16 @@ def social_label(item: Item, source: Source) -> str:
     return source.name
 
 
+SOCIAL_KINDS = ("bluesky", "reddit", "youtube")
+
+
+def source_label(item: Item, source: Source | None) -> str:
+    """The name shown on a kicker or link: a social item shows who posted (@handle, r/sub, channel), not the network."""
+    if source is None:
+        return item.source_id
+    return social_label(item, source) if source.kind in SOCIAL_KINDS else source.name
+
+
 def group_river(items: list[Item], now: datetime, tz: ZoneInfo) -> list[tuple[str, list[Item]]]:
     groups: list[tuple[str, list[Item]]] = []
     for it in items:
@@ -152,6 +162,8 @@ def _env(data: PageData) -> Environment:
     env.filters["pt_time"] = lambda dt: pt_time(dt, tz)
     env.filters["age"] = lambda dt: age(dt, data.updated_at, tz)
     env.filters["social_label"] = lambda pair: social_label(pair[0], pair[1])
+    env.globals["source_label"] = lambda item, source: source_label(item, source)
+    env.globals["SOCIAL_KINDS"] = SOCIAL_KINDS
     env.filters["rfc822"] = lambda dt: dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
     env.globals["group_river"] = lambda items: group_river(items, data.updated_at, tz)
     env.globals["footer_note"] = FOOTER_NOTE

@@ -173,3 +173,19 @@ def test_regional_sections_hidden_when_empty(page_data, tmp_path):
     aside = (tmp_path / "index.html").read_text()
     aside = aside[aside.index("<aside"):aside.index("</aside>")]
     assert "Choctaw" not in aside and "Pacific Northwest Tribes" in aside and "News" in aside
+
+
+def test_social_items_show_who_posted_not_the_network(page_data, tmp_path):
+    post = make_item("bskylead00000001", source_id="bsky", kind="post", title="Post from the lead",
+                     author="Display Name", url="https://bsky.app/profile/lead.bsky.social/post/zzz",
+                     raw={"handle": "lead.bsky.social"}, published_at=hours_ago(1))
+    page_data.culture.insert(0, StoryView(story=make_story("Slead", desk="culture", lead_item_id=post.id, rank=0, headline="A post leads this story"),
+                                          lead=post, lead_source=SRC["bsky"], coverage=[], discussion=[]))
+    render_site(page_data, tmp_path)
+    html = (tmp_path / "index.html").read_text()
+    lead = html[html.index("A post leads this story") - 400:html.index("A post leads this story")]
+    assert ">@lead.bsky.social<" in lead and ">Bluesky<" not in lead and "Display Name" not in lead
+    river = html[html.index('class="river"'):]
+    assert ">@h.bsky.social<" in river and ">r/IndianCountry<" in river
+    assert ">Bluesky<" not in river and ">Reddit<" not in river
+    assert ">ICT<" in river  # a news outlet keeps its name

@@ -1,9 +1,9 @@
 {% macro kicker(sv) %}
-<span class="kicker"><span class="source">{{ sv.lead_source.name }}</span>{% if sv.lead.author %} · {{ sv.lead.author }}{% endif %} · {{ sv.lead.published_at | age }}</span>
+<span class="kicker"><span class="source">{{ source_label(sv.lead, sv.lead_source) }}</span>{% if sv.lead.author and sv.lead_source.kind not in SOCIAL_KINDS %} · {{ sv.lead.author }}{% endif %} · {{ sv.lead.published_at | age }}</span>
 {% endmacro %}
 {% macro coverage_line(sv, label) %}
 {% if sv.coverage %}
-<p class="more"><span class="label">{{ label }}</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ src.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+<p class="more"><span class="label">{{ label }}</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ source_label(item, src) }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
 {% endif %}
 {% endmacro %}
 {% macro discussion_line(sv, label) %}
@@ -24,7 +24,7 @@
   {{ kicker(sv) }}
   <h3><a href="{{ sv.lead.url }}">{{ sv.story.headline }}</a></h3>
   {% if sv.coverage or sv.discussion %}
-  <p class="more"><span class="label">More:</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ src.name }}</a>{% if not loop.last or sv.discussion %}, {% endif %}{% endfor %}{% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+  <p class="more"><span class="label">More:</span> {% for item, src in sv.coverage %}<a href="{{ item.url }}">{{ source_label(item, src) }}</a>{% if not loop.last or sv.discussion %}, {% endif %}{% endfor %}{% for pair in sv.discussion %}<a href="{{ pair[0].url }}">{{ pair | social_label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
   {% endif %}
 </article>
 {% endmacro %}
@@ -34,7 +34,7 @@
   {% for label, group in group_river(items) %}
   <span class="kicker hour">{{ label }}</span>
   {% for item in group %}
-  <p class="river-item"><span class="kicker">{{ data.sources_by_id[item.source_id].name if item.source_id in data.sources_by_id else item.source_id }}</span><a href="{{ item.url }}">{{ item.title }}</a></p>
+  <p class="river-item"><span class="kicker">{{ source_label(item, data.sources_by_id.get(item.source_id)) }}</span><a href="{{ item.url }}">{{ item.title }}</a></p>
   {% endfor %}
   {% endfor %}
 </section>
