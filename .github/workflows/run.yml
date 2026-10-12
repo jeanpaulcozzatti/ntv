@@ -10,7 +10,11 @@ name: run
 
 on:
   schedule:
-    - cron: "17 * * * *"   # :17 past the hour; top-of-hour is GitHub's busiest minute
+    # Every 15 minutes, off the hour marks. GitHub runs schedules best-effort and, on a
+    # public free-tier repo, honored only a few of the hourly ticks; denser ticks give it
+    # more chances. The concurrency group prevents overlap and the curator skips a run
+    # when no new items arrived, so Claude spend is unchanged.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:
