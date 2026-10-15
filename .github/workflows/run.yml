@@ -1,4 +1,4 @@
-# Hourly NTVstreams run on GitHub Actions. No stored secrets anywhere:
+# Twice-daily NTVstreams run on GitHub Actions. No stored secrets anywhere:
 #   - Claude: Workload Identity Federation. GitHub's OIDC token for this job is
 #     exchanged by the anthropic SDK for a short-lived token acting as an Anthropic
 #     service account. The four ANTHROPIC_* IDs below are non-secret repository
@@ -10,11 +10,10 @@ name: run
 
 on:
   schedule:
-    # Every 15 minutes, off the hour marks. GitHub runs schedules best-effort and, on a
-    # public free-tier repo, honored only a few of the hourly ticks; denser ticks give it
-    # more chances. The concurrency group prevents overlap and the curator skips a run
-    # when no new items arrived, so Claude spend is unchanged.
-    - cron: "7,22,37,52 * * * *"
+    # 06:00 and 12:00 Pacific. GitHub cron is UTC-only, so these are fixed for PDT
+    # (UTC-7); during PST (UTC-8) they land an hour early (05:07 / 11:07 PT). Minute 7
+    # avoids the top-of-hour crunch where GitHub drops or delays scheduled runs.
+    - cron: "7 13,19 * * *"
   workflow_dispatch:
 
 permissions:
